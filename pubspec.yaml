@@ -19,6 +19,10 @@ dependencies:
   cloud_firestore: 5.6.1
   the_apple_sign_in: ^1.1.1
   cupertino_icons: ^1.0.2
+  firebase_storage: ^12.4.0
+  image_picker: ^1.1.2
+  
+ 
 
 dev_dependencies:
   flutter_test:

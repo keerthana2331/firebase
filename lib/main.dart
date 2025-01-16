@@ -1,4 +1,5 @@
  // Update the path if needed
+import 'package:authenticationapp/home.dart';
 import 'package:authenticationapp/login_page.dart';
 
 import 'package:firebase_core/firebase_core.dart';
@@ -22,7 +23,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const LogIn(), // Set the default home screen to the SignUp page
+      home: const Home(), // Set the default home screen to the SignUp page
     );
   }
 }
