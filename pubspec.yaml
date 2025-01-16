@@ -21,6 +21,9 @@ dependencies:
   cupertino_icons: ^1.0.2
   firebase_storage: ^12.4.0
   image_picker: ^1.1.2
+  animated_text_kit: ^4.2.2
+  intl: ^0.20.1
+  shared_preferences: ^2.3.5
   
  
 
@@ -36,3 +39,5 @@ flutter:
     - assets/google.png.png
     - assets/apple.png.png
     - assets/firebase.png.png
+    - assets/avatar.png.png
+    - assets/Screenshot 2025-01-17 011604-Photoroom.png

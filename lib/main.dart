@@ -1,4 +1,5 @@
  // Update the path if needed
+import 'package:authenticationapp/front_page.dart';
 import 'package:authenticationapp/home.dart';
 import 'package:authenticationapp/login_page.dart';
 
@@ -23,7 +24,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const Home(), // Set the default home screen to the SignUp page
+      home: ToDoListIntro(), // Set the default home screen to the SignUp page
     );
   }
 }
