@@ -23,16 +23,25 @@ class _SignUpState extends State<SignUp> {
 
   final GoogleSignIn _googleSignIn = GoogleSignIn();
 
+  // Log out the current user
+  Future<void> _logoutCurrentUser() async {
+    await FirebaseAuth.instance.signOut();
+    await _googleSignIn.signOut();
+  }
+
   // Google Sign-In logic
   Future<void> signUpWithGoogle() async {
     try {
+      // Log out the current user
+      await _logoutCurrentUser();
+
       // Trigger Google sign-in
       GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      
+
       if (googleUser != null) {
-        // Get the authentication details
+        // Get authentication details
         GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-        
+
         // Create a new credential for Firebase Authentication
         OAuthCredential credential = GoogleAuthProvider.credential(
           accessToken: googleAuth.accessToken,
@@ -58,11 +67,14 @@ class _SignUpState extends State<SignUp> {
   // Email/Password Sign-Up logic
   Future<void> userSignUp() async {
     try {
+      // Log out the current user
+      await _logoutCurrentUser();
+
       await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
-      // After sign-up, navigate to Home screen
+      // Navigate to Home screen
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const Home()),
@@ -83,7 +95,7 @@ class _SignUpState extends State<SignUp> {
           SizedBox(
             width: MediaQuery.of(context).size.width,
             child: Image.asset(
-              "assets/firebase.png.png", // Ensure this path is correct
+              "assets/firebase.png.png",
               fit: BoxFit.cover,
             ),
           ),
@@ -187,7 +199,7 @@ class _SignUpState extends State<SignUp> {
                           name = nameController.text;
                           password = passwordController.text;
                         });
-                        userSignUp(); // This ensures navigation happens after successful sign-up
+                        userSignUp();
                       }
                     },
                     child: Container(
@@ -213,13 +225,12 @@ class _SignUpState extends State<SignUp> {
                     ),
                   ),
                   const SizedBox(height: 40.0),
-                  // Google Sign-In Icon
                   GestureDetector(
-                    onTap: signUpWithGoogle, // Call the Google Sign-In function
+                    onTap: signUpWithGoogle,
                     child: CircleAvatar(
                       radius: 30,
                       backgroundColor: Colors.white,
-                      backgroundImage: AssetImage('assets/google.png.png'), // Google icon
+                      backgroundImage: AssetImage('assets/google.png.png'),
                     ),
                   ),
                 ],
