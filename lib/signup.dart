@@ -1,8 +1,10 @@
+import 'package:authenticationapp/front_page.dart';
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:authenticationapp/home.dart';
 import 'package:authenticationapp/login_page.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 
 class SignUp extends StatelessWidget {
   SignUp({super.key});
@@ -11,7 +13,6 @@ class SignUp extends StatelessWidget {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController nameController = TextEditingController();
-
   final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   Future<void> _logoutCurrentUser() async {
@@ -31,190 +32,429 @@ class SignUp extends StatelessWidget {
           idToken: googleAuth.idToken,
         );
         await FirebaseAuth.instance.signInWithCredential(credential);
-
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const Home()),
-        );
+        Navigator.pushReplacement(context, CustomPageRoute(child: Home()));
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Failed to sign in with Google: $e'),
-      ));
+      _showErrorSnackBar(context, 'google-sign-up-failed');
     }
   }
 
   Future<void> userSignUp(BuildContext context) async {
     try {
       await _logoutCurrentUser();
-
       await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: emailController.text,
         password: passwordController.text,
       );
-
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => Home()),
-      );
+      Navigator.pushReplacement(context, CustomPageRoute(child: Home()));
     } on FirebaseAuthException catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(e.message ?? 'An error occurred'),
-      ));
+      _showErrorSnackBar(context, e.code);
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Stack(
-              children: [
-                Container(
-                  height: 300,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFF273671),
-                    borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.circular(100),
-                      bottomRight: Radius.circular(100),
-                    ),
-                  ),
-                ),
-                Positioned(
-                  top: 100,
-                  left: 0,
-                  right: 0,
-                  child: Column(
-                    children: [
-                      CircleAvatar(
-                        radius: 50,
-                        backgroundColor: Colors.black,
-                        backgroundImage: const AssetImage('assets/avatar.png.png'), // Profile Image
-                      ),
-                      const SizedBox(height: 10),
-                      const Text(
-                        "Sign Up",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 40),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    _buildInputField(nameController, "Name", Icons.person),
-                    const SizedBox(height: 20),
-                    _buildInputField(emailController, "Email", Icons.email),
-                    const SizedBox(height: 20),
-                    _buildInputField(passwordController, "Password", Icons.lock, obscureText: true),
-                    const SizedBox(height: 30),
-                    ElevatedButton(
-                      onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          userSignUp(context);
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF273671),
-                        padding: const EdgeInsets.symmetric(vertical: 15),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                      ),
-                      child: const Text(
-                        "Sign Up",
-                        style: TextStyle(fontSize: 18),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    Align(
-                      alignment: Alignment.center,
-                      child: GestureDetector(
-                        onTap: () => signUpWithGoogle(context),
-                        child: CircleAvatar(
-                          radius: 30,
-                          backgroundColor: Colors.white,
-                          backgroundImage: const AssetImage('assets/google.png.png'),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 40),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text(
-                  "Already have an account?",
-                  style: TextStyle(
-                    color: Color(0xFF8c8e98),
-                    fontSize: 16,
-                  ),
-                ),
-                GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => LogIn()),
-                    );
-                  },
-                  child: const Text(
-                    " Log In",
-                    style: TextStyle(
-                      color: Color(0xFF273671),
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-          ],
+  void _showErrorSnackBar(BuildContext context, String code) {
+    String message = "An error occurred";
+    if (code == 'email-already-in-use') {
+      message = "Email is already registered";
+    } else if (code == 'weak-password') {
+      message = "Password is too weak";
+    } else if (code == 'google-sign-up-failed') {
+      message = "Google sign up failed";
+    }
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        behavior: SnackBarBehavior.floating,
+        margin: EdgeInsets.all(10),
+        backgroundColor: Colors.deepOrange.shade400,
+        content: Text(
+          message,
+          style: GoogleFonts.poppins(
+            fontSize: 16,
+            color: Colors.white,
+          ),
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15),
         ),
       ),
     );
   }
 
-  Widget _buildInputField(TextEditingController controller, String hint, IconData icon, {bool obscureText = false}) {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Colors.yellow.shade100,
+              Colors.orange.shade100,
+              Colors.deepOrange.shade100,
+            ],
+            stops: const [0.0, 0.5, 1.0],
+          ),
+        ),
+        child: SafeArea(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Back Button
+                  TweenAnimationBuilder(
+                    tween: Tween<double>(begin: 0, end: 1),
+                    duration: const Duration(milliseconds: 800),
+                    builder: (context, double value, child) {
+                      return Opacity(
+                        opacity: value,
+                        child: IconButton(
+                          icon: Icon(
+                            Icons.arrow_back_ios_rounded,
+                            color: Colors.deepOrange.shade400,
+                          ),
+                          onPressed: () => Navigator.pushReplacement(
+                            context,
+                            CustomPageRoute(child: LogIn()),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // Profile Picture and Title
+                  TweenAnimationBuilder(
+                    tween: Tween<double>(begin: 0, end: 1),
+                    duration: const Duration(milliseconds: 1000),
+                    builder: (context, double value, child) {
+                      return Transform.scale(
+                        scale: value,
+                        child: Center(
+                          child: Column(
+                            children: [
+                              Container(
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.2),
+                                      spreadRadius: 2,
+                                      blurRadius: 10,
+                                    ),
+                                  ],
+                                ),
+                                child: CircleAvatar(
+                                  radius: 50,
+                                  backgroundColor: Colors.white,
+                                  backgroundImage: const AssetImage('assets/avatar.png.png'),
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                              ShaderMask(
+                                shaderCallback: (bounds) => LinearGradient(
+                                  colors: [
+                                    Colors.orange.shade700,
+                                    Colors.deepOrange.shade900,
+                                  ],
+                                ).createShader(bounds),
+                                child: Text(
+                                  "Create Account",
+                                  style: GoogleFonts.poppins(
+                                    color: Colors.white,
+                                    fontSize: 32,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+
+                  const SizedBox(height: 40),
+
+                  // Sign Up Form
+                  Form(
+                    key: _formKey,
+                    child: Column(
+                      children: [
+                        // Name Field
+                        TweenAnimationBuilder(
+                          tween: Tween<double>(begin: 0, end: 1),
+                          duration: const Duration(milliseconds: 1200),
+                          builder: (context, double value, child) {
+                            return Transform.translate(
+                              offset: Offset(0, 50 * (1 - value)),
+                              child: Opacity(
+                                opacity: value,
+                                child: _buildInputField(
+                                  controller: nameController,
+                                  hintText: "Name",
+                                  icon: Icons.person_rounded,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        // Email Field
+                        TweenAnimationBuilder(
+                          tween: Tween<double>(begin: 0, end: 1),
+                          duration: const Duration(milliseconds: 1400),
+                          builder: (context, double value, child) {
+                            return Transform.translate(
+                              offset: Offset(0, 50 * (1 - value)),
+                              child: Opacity(
+                                opacity: value,
+                                child: _buildInputField(
+                                  controller: emailController,
+                                  hintText: "Email",
+                                  icon: Icons.email_rounded,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        // Password Field
+                        TweenAnimationBuilder(
+                          tween: Tween<double>(begin: 0, end: 1),
+                          duration: const Duration(milliseconds: 1600),
+                          builder: (context, double value, child) {
+                            return Transform.translate(
+                              offset: Offset(0, 50 * (1 - value)),
+                              child: Opacity(
+                                opacity: value,
+                                child: _buildInputField(
+                                  controller: passwordController,
+                                  hintText: "Password",
+                                  icon: Icons.lock_rounded,
+                                  obscureText: true,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+
+                        const SizedBox(height: 40),
+
+                        // Sign Up Button
+                        TweenAnimationBuilder(
+                          tween: Tween<double>(begin: 0, end: 1),
+                          duration: const Duration(milliseconds: 1800),
+                          builder: (context, double value, child) {
+                            return Transform.scale(
+                              scale: value,
+                              child: _buildSignUpButton(context),
+                            );
+                          },
+                        ),
+
+                        const SizedBox(height: 30),
+
+                        // Google Sign Up
+                        TweenAnimationBuilder(
+                          tween: Tween<double>(begin: 0, end: 1),
+                          duration: const Duration(milliseconds: 2000),
+                          builder: (context, double value, child) {
+                            return Opacity(
+                              opacity: value,
+                              child: Column(
+                                children: [
+                                  Text(
+                                    "Or sign up with",
+                                    style: GoogleFonts.poppins(
+                                      color: Colors.grey.shade600,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 20),
+                                  GestureDetector(
+                                    onTap: () => signUpWithGoogle(context),
+                                    child: Container(
+                                      padding: EdgeInsets.all(12),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(15),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black.withOpacity(0.1),
+                                            blurRadius: 10,
+                                            offset: Offset(0, 5),
+                                          ),
+                                        ],
+                                      ),
+                                      child: Image.asset(
+                                        "assets/google.png.png",
+                                        height: 30,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+
+                        const SizedBox(height: 30),
+
+                        // Login Link
+                        TweenAnimationBuilder(
+                          tween: Tween<double>(begin: 0, end: 1),
+                          duration: const Duration(milliseconds: 2200),
+                          builder: (context, double value, child) {
+                            return Opacity(
+                              opacity: value,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    "Already have an account? ",
+                                    style: GoogleFonts.poppins(
+                                      color: Colors.grey.shade600,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                  GestureDetector(
+                                    onTap: () => Navigator.pushReplacement(
+                                      context,
+                                      CustomPageRoute(child: LogIn()),
+                                    ),
+                                    child: Text(
+                                      "Login",
+                                      style: GoogleFonts.poppins(
+                                        color: Colors.deepOrange.shade400,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInputField({
+    required TextEditingController controller,
+    required String hintText,
+    required IconData icon,
+    bool obscureText = false,
+  }) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20.0),
       decoration: BoxDecoration(
-        color: const Color(0xFFedf0f8),
-        borderRadius: BorderRadius.circular(30),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: Offset(0, 5),
+          ),
+        ],
       ),
       child: TextFormField(
         controller: controller,
         obscureText: obscureText,
         validator: (value) {
           if (value == null || value.isEmpty) {
-            return 'Please enter $hint';
+            return 'Please enter $hintText';
+          }
+          if (hintText == "Email" && !value.contains('@')) {
+            return 'Please enter a valid email';
+          }
+          if (hintText == "Password" && value.length < 6) {
+            return 'Password must be at least 6 characters';
           }
           return null;
         },
+        style: GoogleFonts.poppins(
+          fontSize: 16,
+          color: Colors.black87,
+        ),
         decoration: InputDecoration(
-          border: InputBorder.none,
-          prefixIcon: Icon(icon, color: const Color(0xFFb2b7bf)),
-          hintText: hint,
-          hintStyle: const TextStyle(
-            color: Color(0xFFb2b7bf),
-            fontSize: 18.0,
+          prefixIcon: Icon(
+            icon,
+            color: Colors.deepOrange.shade400,
+          ),
+          hintText: hintText,
+          hintStyle: GoogleFonts.poppins(
+            color: Colors.grey.shade400,
+            fontSize: 16,
+          ),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(15),
+            borderSide: BorderSide.none,
+          ),
+          filled: true,
+          fillColor: Colors.white,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSignUpButton(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      height: 55,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Colors.orange.shade400,
+            Colors.deepOrange.shade400,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.orange.withOpacity(0.3),
+            spreadRadius: 1,
+            blurRadius: 8,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      child: ElevatedButton(
+        onPressed: () {
+          if (_formKey.currentState!.validate()) {
+            userSignUp(context);
+          }
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+        ),
+        child: Text(
+          "Sign Up",
+          style: GoogleFonts.poppins(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ),

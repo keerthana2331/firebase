@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'login_page.dart';
@@ -33,16 +33,19 @@ class Home extends StatelessWidget {
       await FirebaseAuth.instance.signOut();
       Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(builder: (context) =>LogIn()),
+        MaterialPageRoute(builder: (context) => LogIn()),
         (Route<dynamic> route) => false,
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Error signing out. Please try again.'),
-          backgroundColor: Colors.red.shade400,
+          content: Text(
+            'Error signing out. Please try again.',
+            style: GoogleFonts.poppins(color: Colors.white),
+          ),
+          backgroundColor: Colors.deepOrange.shade400,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
           margin: const EdgeInsets.all(10),
         ),
       );
@@ -63,11 +66,20 @@ class Home extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: noteColors[colorIndex].withOpacity(0.3),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Colors.yellow.shade50,
+                Colors.orange.shade50,
+                Colors.deepOrange.shade50,
+              ],
+              stops: const [0.0, 0.5, 1.0],
+            ),
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.withOpacity(0.2),
+                color: Colors.black.withOpacity(0.1),
                 blurRadius: 10,
                 spreadRadius: 2,
               ),
@@ -76,50 +88,84 @@ class Home extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                id == null ? 'New Note' : 'Edit Note',
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF2C3E50),
+              ShaderMask(
+                shaderCallback: (bounds) => LinearGradient(
+                  colors: [
+                    Colors.orange.shade700,
+                    Colors.deepOrange.shade900,
+                  ],
+                ).createShader(bounds),
+                child: Text(
+                  id == null ? 'New Note' : 'Edit Note',
+                  style: GoogleFonts.poppins(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
               const SizedBox(height: 20),
-              Material(
-                elevation: 2,
-                borderRadius: BorderRadius.circular(15),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(15),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 10,
+                      offset: const Offset(0, 5),
+                    ),
+                  ],
+                ),
                 child: TextField(
                   controller: titleController,
                   decoration: InputDecoration(
                     hintText: 'Title',
-                    filled: true,
-                    fillColor: Colors.white,
+                    hintStyle: GoogleFonts.poppins(
+                      color: Colors.grey.shade400,
+                    ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(15),
                       borderSide: BorderSide.none,
                     ),
+                    filled: true,
+                    fillColor: Colors.white,
                     contentPadding: const EdgeInsets.all(15),
                   ),
+                  style: GoogleFonts.poppins(),
                   onChanged: (value) => title = value,
                 ),
               ),
               const SizedBox(height: 15),
-              Material(
-                elevation: 2,
-                borderRadius: BorderRadius.circular(15),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(15),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 10,
+                      offset: const Offset(0, 5),
+                    ),
+                  ],
+                ),
                 child: TextField(
                   controller: contentController,
                   maxLines: 5,
                   decoration: InputDecoration(
                     hintText: 'Write your note here...',
-                    filled: true,
-                    fillColor: Colors.white,
+                    hintStyle: GoogleFonts.poppins(
+                      color: Colors.grey.shade400,
+                    ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(15),
                       borderSide: BorderSide.none,
                     ),
+                    filled: true,
+                    fillColor: Colors.white,
                     contentPadding: const EdgeInsets.all(15),
                   ),
+                  style: GoogleFonts.poppins(),
                   onChanged: (value) => content = value,
                 ),
               ),
@@ -129,37 +175,69 @@ class Home extends StatelessWidget {
                 children: [
                   TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: const Text('Cancel'),
-                  ),
-                  const SizedBox(width: 10),
-                  ElevatedButton(
-                    onPressed: () async {
-                      if (title?.isNotEmpty == true && content?.isNotEmpty == true) {
-                        final firestore = FirebaseFirestore.instance;
-                        if (id == null) {
-                          await firestore.collection('notes').add({
-                            'title': title,
-                            'content': content,
-                            'timestamp': FieldValue.serverTimestamp(),
-                            'colorIndex': colorIndex,
-                          });
-                        } else {
-                          await firestore.collection('notes').doc(id).update({
-                            'title': title,
-                            'content': content,
-                            'lastModified': FieldValue.serverTimestamp(),
-                          });
-                        }
-                        Navigator.pop(context);
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).primaryColor,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                    child: Text(
+                      'Cancel',
+                      style: GoogleFonts.poppins(
+                        color: Colors.grey.shade600,
                       ),
                     ),
-                    child: Text(id == null ? 'Add Note' : 'Save Changes'),
+                  ),
+                  const SizedBox(width: 10),
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Colors.orange.shade400,
+                          Colors.deepOrange.shade400,
+                        ],
+                      ),
+                      borderRadius: BorderRadius.circular(15),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.orange.withOpacity(0.3),
+                          spreadRadius: 1,
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        if (title?.isNotEmpty == true && content?.isNotEmpty == true) {
+                          final firestore = FirebaseFirestore.instance;
+                          if (id == null) {
+                            await firestore.collection('notes').add({
+                              'title': title,
+                              'content': content,
+                              'timestamp': FieldValue.serverTimestamp(),
+                              'colorIndex': colorIndex,
+                            });
+                          } else {
+                            await firestore.collection('notes').doc(id).update({
+                              'title': title,
+                              'content': content,
+                              'lastModified': FieldValue.serverTimestamp(),
+                            });
+                          }
+                          Navigator.pop(context);
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        shadowColor: Colors.transparent,
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                      ),
+                      child: Text(
+                        id == null ? 'Add Note' : 'Save Changes',
+                        style: GoogleFonts.poppins(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -173,261 +251,303 @@ class Home extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-  elevation: 2,
-  backgroundColor: Colors.white,
-  title: const Text(
-    "My Sticky Notes",
-    style: TextStyle(
-      color: Colors.black87,
-      fontWeight: FontWeight.bold,
-    ),
-  ),
-  centerTitle: true,
-  automaticallyImplyLeading: false, // This removes the back arrow
-  actions: [
-    IconButton(
-      icon: const Icon(Icons.logout, color: Colors.black87),
-      onPressed: () => _signOut(context),
-      tooltip: 'Logout',
-    ),
-  ],
-),
-
-      body: FutureBuilder<bool>(
-        future: _getViewPreference(),
-        builder: (context, snapshot) {
-          final isGrid = snapshot.data ?? true;
-          
-          return StreamBuilder<QuerySnapshot>(
-            stream: FirebaseFirestore.instance
-                .collection('notes')
-                .orderBy('timestamp', descending: true)
-                .snapshots(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              }
-
-              if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.note_add_rounded,
-                        size: 80,
-                        color: Colors.grey[300],
-                      ),
-                      const SizedBox(height: 16),
-                      const Text(
-                        'No Notes Yet',
-                        style: TextStyle(
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Colors.yellow.shade100,
+              Colors.orange.shade100,
+              Colors.deepOrange.shade100,
+            ],
+            stops: const [0.0, 0.5, 1.0],
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    ShaderMask(
+                      shaderCallback: (bounds) => LinearGradient(
+                        colors: [
+                          Colors.orange.shade700,
+                          Colors.deepOrange.shade900,
+                        ],
+                      ).createShader(bounds),
+                      child: Text(
+                        "My Notes",
+                        style: GoogleFonts.poppins(
+                          color: Colors.white,
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF2C3E50),
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Tap + to create your first note',
-                        style: TextStyle(
-                          color: Colors.grey[600],
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }
-
-              final notes = snapshot.data!.docs;
-
-              if (isGrid) {
-                return GridView.builder(
-                  padding: const EdgeInsets.all(16),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 16,
-                    childAspectRatio: 0.85,
-                  ),
-                  itemCount: notes.length,
-                  itemBuilder: (context, index) {
-                    final note = notes[index];
-                    final noteData = note.data() as Map<String, dynamic>;
-                    final colorIndex = noteData['colorIndex'] ?? index % noteColors.length;
-                    
-                    return _buildNoteCard(context, note.id, noteData, noteColors[colorIndex]);
-                  },
-                );
-              } else {
-                return ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: notes.length,
-                  itemBuilder: (context, index) {
-                    final note = notes[index];
-                    final noteData = note.data() as Map<String, dynamic>;
-                    final colorIndex = noteData['colorIndex'] ?? index % noteColors.length;
-                    
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 16),
-                      child: _buildNoteCard(context, note.id, noteData, noteColors[colorIndex]),
-                    );
-                  },
-                );
-              }
-            },
-          );
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _addOrUpdateNote(context),
-        backgroundColor: Theme.of(context).primaryColor,
-        child: const Icon(Icons.add),
-        elevation: 4,
-      ),
-    );
-  }
-
-  Widget _buildNoteCard(BuildContext context, String id, Map<String, dynamic> noteData, Color color) {
-    final timestamp = noteData['timestamp'] as Timestamp?;
-    final dateStr = timestamp != null
-        ? DateFormat('MMM d, y').format(timestamp.toDate())
-        : 'No date';
-
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-      color: color.withOpacity(0.7),
-      child: InkWell(
-        onTap: () => _addOrUpdateNote(
-          context,
-          id: id,
-          currentTitle: noteData['title'],
-          currentContent: noteData['content'],
-        ),
-        borderRadius: BorderRadius.circular(15),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Text(
-                      noteData['title'] ?? 'Untitled',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                        color: Color(0xFF2C3E50),
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                  PopupMenuButton(
-                    icon: const Icon(Icons.more_vert, color: Color(0xFF2C3E50)),
-                    itemBuilder: (context) => [
-                      const PopupMenuItem(
-                        value: 'edit',
-                        child: Row(
-                          children: [
-                            Icon(Icons.edit),
-                            SizedBox(width: 8),
-                            Text('Edit'),
-                          ],
-                        ),
+                    IconButton(
+                      icon: Icon(
+                        Icons.logout_rounded,
+                        color: Colors.deepOrange.shade400,
                       ),
-                      const PopupMenuItem(
-                        value: 'delete',
-                        child: Row(
-                          children: [
-                            Icon(Icons.delete),
-                            SizedBox(width: 8),
-                            Text('Delete'),
-                          ],
-                        ),
-                      ),
-                    ],
-                    onSelected: (value) {
-                      if (value == 'edit') {
-                        _addOrUpdateNote(
-                          context,
-                          id: id,
-                          currentTitle: noteData['title'],
-                          currentContent: noteData['content'],
-                        );
-                      } else if (value == 'delete') {
-                        _deleteNoteConfirm(context, id);
-                      }
-                    },
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Expanded(
-                child: Text(
-                  noteData['content'] ?? 'No content',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[800],
-                  ),
-                  maxLines: 5,
-                  overflow: TextOverflow.ellipsis,
+                      onPressed: () => _signOut(context),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 8),
-              Text(
-                dateStr,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey[600],
+              Expanded(
+                child: FutureBuilder<bool>(
+                  future: _getViewPreference(),
+                  builder: (context, snapshot) {
+                    final isGrid = snapshot.data ?? true;
+                    
+                    return StreamBuilder<QuerySnapshot>(
+                      stream: FirebaseFirestore.instance
+                          .collection('notes')
+                          .orderBy('timestamp', descending: true)
+                          .snapshots(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return Center(
+                            child: CircularProgressIndicator(
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.deepOrange.shade400,
+                              ),
+                            ),
+                          );
+                        }
+
+                        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                          return TweenAnimationBuilder(
+                            tween: Tween<double>(begin: 0, end: 1),
+                            duration: const Duration(milliseconds: 1000),
+                            builder: (context, double value, child) {
+                              return Opacity(
+                                opacity: value,
+                                child: Center(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.note_add_rounded,
+                                        size: 80,
+                                        color: Colors.deepOrange.shade200,
+                                      ),
+                                      const SizedBox(height: 16),
+                                      Text(
+                                        'No Notes Yet',
+                                        style: GoogleFonts.poppins(
+                                          fontSize: 24,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.deepOrange.shade400,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        'Tap + to create your first note',
+                                        style: GoogleFonts.poppins(
+                                          color: Colors.grey.shade600,
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          );
+                        }
+
+                        final notes = snapshot.data!.docs;
+
+                        if (isGrid) {
+                          return GridView.builder(
+                            padding: const EdgeInsets.all(16),
+                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              crossAxisSpacing: 16,
+                              mainAxisSpacing: 16,
+                              childAspectRatio: 0.85,
+                            ),
+                            itemCount: notes.length,
+                            itemBuilder: (context, index) {
+                              final note = notes[index];
+                              final noteData = note.data() as Map<String, dynamic>;
+                              final colorIndex = noteData['colorIndex'] ?? index % noteColors.length;
+                              
+                              return _buildNoteCard(context, note.id, noteData, noteColors[colorIndex]);
+                            },
+                          );
+                        } else {
+                          return ListView.builder(
+                            padding: const EdgeInsets.all(16),
+                            itemCount: notes.length,
+                            itemBuilder: (context, index) {
+                              final note = notes[index];
+                              final noteData = note.data() as Map<String, dynamic>;
+                              final colorIndex = noteData['colorIndex'] ?? index % noteColors.length;
+                              
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 16),
+                                child: _buildNoteCard(context, note.id, noteData, noteColors[colorIndex]),
+                              );
+                            },
+                          );
+                        }
+                      },
+                    );
+                  },
                 ),
               ),
             ],
           ),
         ),
       ),
+      floatingActionButton: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Colors.orange.shade400,
+              Colors.deepOrange.shade400,
+            ],
+          ),
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.orange.withOpacity(0.3),
+              spreadRadius: 1,
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: FloatingActionButton(
+          onPressed: () => _addOrUpdateNote(context),
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+          child: const Icon(Icons.add),
+        ),
+      ),
     );
   }
+   Widget _buildNoteCard(BuildContext context, String id, Map<String, dynamic> noteData, Color color) {
+  final timestamp = noteData['timestamp'] as Timestamp?;
+  final formattedTime = timestamp != null
+      ? DateFormat('MMM dd, yyyy').format(timestamp.toDate())
+      : 'Unknown Date';
 
-  Future<void> _deleteNoteConfirm(BuildContext context, String id) async {
-    bool? confirm = await showDialog<bool>(
+  return GestureDetector(
+    onTap: () => _addOrUpdateNote(
+      context,
+      id: id,
+      currentTitle: noteData['title'] as String?,
+      currentContent: noteData['content'] as String?,
+    ),
+    onLongPress: () => _deleteNoteDialog(context, id),
+    child: Container(
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  noteData['title'] ?? 'Untitled',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.poppins(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.delete, color: Colors.redAccent),
+                onPressed: () => _deleteNoteDialog(context, id),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Expanded(
+            child: Text(
+              noteData['content'] ?? '',
+              maxLines: 4,
+              overflow: TextOverflow.ellipsis,
+              style: GoogleFonts.poppins(
+                fontSize: 14,
+                color: Colors.black54,
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Align(
+            alignment: Alignment.bottomRight,
+            child: Text(
+              formattedTime,
+              style: GoogleFonts.poppins(
+                fontSize: 12,
+                color: Colors.black45,
+              ),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+
+  Future<void> _deleteNoteDialog(BuildContext context, String id) async {
+    showDialog(
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        title: const Text('Delete Note'),
-        content: const Text('Are you sure you want to delete this note?'),
+        title: Text(
+          'Delete Note',
+          style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+        ),
+        content: Text(
+          'Are you sure you want to delete this note?',
+          style: GoogleFonts.poppins(),
+        ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'Cancel',
+              style: GoogleFonts.poppins(color: Colors.grey),
+            ),
           ),
           TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete'),
+            onPressed: () async {
+              Navigator.pop(context);
+              await FirebaseFirestore.instance.collection('notes').doc(id).delete();
+            },
+            child: Text(
+              'Delete',
+              style: GoogleFonts.poppins(color: Colors.red),
+            ),
           ),
         ],
       ),
     );
-
-    if (confirm == true) {
-      await FirebaseFirestore.instance.collection('notes').doc(id).delete();
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Note deleted'),
-            backgroundColor: Colors.red.shade400,
-            behavior: SnackBarBehavior.floating,
-            margin: const EdgeInsets.all(10),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          ),
-        );
-      }
-    }
   }
 }

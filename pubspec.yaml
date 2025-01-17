@@ -24,6 +24,7 @@ dependencies:
   animated_text_kit: ^4.2.2
   intl: ^0.20.1
   shared_preferences: ^2.3.5
+  google_fonts: ^6.2.1
   
  
 

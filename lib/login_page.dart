@@ -1,12 +1,13 @@
-import 'package:authenticationapp/front_page.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:authenticationapp/home.dart';
 import 'package:authenticationapp/signup.dart';
 import 'package:authenticationapp/forget_password.dart';
- // Updated import for TodoIntroScreen
+import 'package:authenticationapp/front_page.dart';
 
+// Reuse the same CustomPageRoute for consistent transitions
 class LogIn extends StatelessWidget {
   LogIn({super.key});
 
@@ -23,22 +24,41 @@ class LogIn extends StatelessWidget {
   Future<void> userLogin(BuildContext context, String email, String password) async {
     try {
       await _logoutCurrentUser();
-      await FirebaseAuth.instance.signInWithEmailAndPassword(email: email, password: password);
-      Navigator.push(context, MaterialPageRoute(builder: (context) => Home()));
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email, 
+        password: password
+      );
+      Navigator.push(context, CustomPageRoute(child: Home()));
     } on FirebaseAuthException catch (e) {
-      if (e.code == 'user-not-found') {
-        _showSnackBar(context, "No User Found for that Email");
-      } else if (e.code == 'wrong-password') {
-        _showSnackBar(context, "Wrong Password Provided by User");
-      }
+      _showErrorSnackBar(context, e.code);
     }
   }
 
-  void _showSnackBar(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      backgroundColor: Colors.orangeAccent,
-      content: Text(message, style: TextStyle(fontSize: 18.0)),
-    ));
+  void _showErrorSnackBar(BuildContext context, String code) {
+    String message = "An error occurred";
+    if (code == 'user-not-found') {
+      message = "No User Found for that Email";
+    } else if (code == 'wrong-password') {
+      message = "Wrong Password Provided";
+    }
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        behavior: SnackBarBehavior.floating,
+        margin: EdgeInsets.all(10),
+        backgroundColor: Colors.deepOrange.shade400,
+        content: Text(
+          message,
+          style: GoogleFonts.poppins(
+            fontSize: 16,
+            color: Colors.white,
+          ),
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15),
+        ),
+      ),
+    );
   }
 
   Future<void> signInWithGoogle(BuildContext context) async {
@@ -54,175 +74,357 @@ class LogIn extends StatelessWidget {
       );
 
       await FirebaseAuth.instance.signInWithCredential(credential);
-      Navigator.push(context, MaterialPageRoute(builder: (context) => Home()));
+      Navigator.push(context, CustomPageRoute(child: Home()));
     } catch (e) {
-      print("Error during Google Sign-In: $e");
-      _showSnackBar(context, "Google Sign-In Failed");
+      _showErrorSnackBar(context, "google-sign-in-failed");
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: Stack(
-        children: [
-          SingleChildScrollView(
-            child: Column(
-              children: [
-                Stack(
-                  children: [
-                    Image.asset(
-                      "assets/firebase.png.png", // Updated path for image
-                      width: MediaQuery.of(context).size.width,
-                      fit: BoxFit.cover,
-                    ),
-                    Positioned(
-                      top: 30.0,
-                      left: 10.0,
-                      child: IconButton(
-                        icon: Icon(Icons.arrow_back, color: Colors.white),
-                        onPressed: () {
-                          Navigator.push(
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Colors.yellow.shade100,
+              Colors.orange.shade100,
+              Colors.deepOrange.shade100,
+            ],
+            stops: const [0.0, 0.5, 1.0],
+          ),
+        ),
+        child: SafeArea(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(40.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Back Button
+                  TweenAnimationBuilder(
+                    tween: Tween<double>(begin: 0, end: 1),
+                    duration: const Duration(milliseconds: 800),
+                    builder: (context, double value, child) {
+                      return Opacity(
+                        opacity: value,
+                        child: IconButton(
+                          icon: Icon(
+                            Icons.arrow_back_ios_rounded,
+                            color: Colors.deepOrange.shade400,
+                          ),
+                          onPressed: () => Navigator.pushReplacement(
                             context,
-                            MaterialPageRoute(builder: (context) => ToDoListIntro()),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 30.0),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                  child: Form(
+                            CustomPageRoute(child: ToDoListIntro()),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+
+                  const SizedBox(height: 40),
+
+                  // Welcome Text
+                  TweenAnimationBuilder(
+                    tween: Tween<double>(begin: 0, end: 1),
+                    duration: const Duration(milliseconds: 1000),
+                    builder: (context, double value, child) {
+                      return Transform.translate(
+                        offset: Offset(50 * (1 - value), 0),
+                        child: Opacity(
+                          opacity: value,
+                          child: Text(
+                            "Welcome Back!",
+                            style: GoogleFonts.poppins(
+                              fontSize: 32,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.deepOrange.shade400,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+
+                  const SizedBox(height: 40),
+
+                  // Login Form
+                  Form(
                     key: _formkey,
                     child: Column(
                       children: [
-                        buildInputField(
-                          controller: mailcontroller,
-                          hintText: "Email",
-                          validator: (value) => value == null || value.isEmpty ? 'Please Enter E-mail' : null,
-                        ),
-                        SizedBox(height: 30.0),
-                        buildInputField(
-                          controller: passwordcontroller,
-                          hintText: "Password",
-                          obscureText: true,
-                          validator: (value) => value == null || value.isEmpty ? 'Please Enter Password' : null,
-                        ),
-                        SizedBox(height: 30.0),
-                        GestureDetector(
-                          onTap: () {
-                            if (_formkey.currentState!.validate()) {
-                              userLogin(context, mailcontroller.text, passwordcontroller.text);
-                            }
+                        TweenAnimationBuilder(
+                          tween: Tween<double>(begin: 0, end: 1),
+                          duration: const Duration(milliseconds: 1200),
+                          builder: (context, double value, child) {
+                            return Transform.translate(
+                              offset: Offset(0, 50 * (1 - value)),
+                              child: Opacity(
+                                opacity: value,
+                                child: _buildInputField(
+                                  controller: mailcontroller,
+                                  hintText: "Email",
+                                  icon: Icons.email_rounded,
+                                  validator: (value) => value?.isEmpty ?? true
+                                      ? 'Please Enter Email'
+                                      : null,
+                                ),
+                              ),
+                            );
                           },
-                          child: buildSignInButton("Sign In", context),
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        TweenAnimationBuilder(
+                          tween: Tween<double>(begin: 0, end: 1),
+                          duration: const Duration(milliseconds: 1400),
+                          builder: (context, double value, child) {
+                            return Transform.translate(
+                              offset: Offset(0, 50 * (1 - value)),
+                              child: Opacity(
+                                opacity: value,
+                                child: _buildInputField(
+                                  controller: passwordcontroller,
+                                  hintText: "Password",
+                                  icon: Icons.lock_rounded,
+                                  obscureText: true,
+                                  validator: (value) => value?.isEmpty ?? true
+                                      ? 'Please Enter Password'
+                                      : null,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+
+                        const SizedBox(height: 30),
+
+                        // Login Button
+                        TweenAnimationBuilder(
+                          tween: Tween<double>(begin: 0, end: 1),
+                          duration: const Duration(milliseconds: 1600),
+                          builder: (context, double value, child) {
+                            return Transform.scale(
+                              scale: value,
+                              child: _buildLoginButton(context),
+                            );
+                          },
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        // Forgot Password
+                        TweenAnimationBuilder(
+                          tween: Tween<double>(begin: 0, end: 1),
+                          duration: const Duration(milliseconds: 1800),
+                          builder: (context, double value, child) {
+                            return Opacity(
+                              opacity: value,
+                              child: TextButton(
+                                onPressed: () => Navigator.push(
+                                  context,
+                                  CustomPageRoute(child: ForgotPassword()),
+                                ),
+                                child: Text(
+                                  "Forgot Password?",
+                                  style: GoogleFonts.poppins(
+                                    color: Colors.deepOrange.shade400,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+
+                        const SizedBox(height: 30),
+
+                        // Google Sign In
+                        TweenAnimationBuilder(
+                          tween: Tween<double>(begin: 0, end: 1),
+                          duration: const Duration(milliseconds: 2000),
+                          builder: (context, double value, child) {
+                            return Opacity(
+                              opacity: value,
+                              child: Column(
+                                children: [
+                                  Text(
+                                    "Or continue with",
+                                    style: GoogleFonts.poppins(
+                                      color: Colors.grey.shade600,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 20),
+                                  GestureDetector(
+                                    onTap: () => signInWithGoogle(context),
+                                    child: Container(
+                                      padding: EdgeInsets.all(12),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(15),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black.withOpacity(0.1),
+                                            blurRadius: 10,
+                                            offset: Offset(0, 5),
+                                          ),
+                                        ],
+                                      ),
+                                      child: Image.asset(
+                                        "assets/google.png.png",
+                                        height: 30,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+
+                        const SizedBox(height: 30),
+
+                        // Sign Up Link
+                        TweenAnimationBuilder(
+                          tween: Tween<double>(begin: 0, end: 1),
+                          duration: const Duration(milliseconds: 2200),
+                          builder: (context, double value, child) {
+                            return Opacity(
+                              opacity: value,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    "Don't have an account? ",
+                                    style: GoogleFonts.poppins(
+                                      color: Colors.grey.shade600,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                  GestureDetector(
+                                    onTap: () => Navigator.push(
+                                      context,
+                                      CustomPageRoute(child: SignUp()),
+                                    ),
+                                    child: Text(
+                                      "Sign Up",
+                                      style: GoogleFonts.poppins(
+                                        color: Colors.deepOrange.shade400,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
                         ),
                       ],
                     ),
                   ),
-                ),
-                SizedBox(height: 20.0),
-                GestureDetector(
-                  onTap: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => ForgotPassword()));
-                  },
-                  child: Text(
-                    "Forgot Password?",
-                    style: TextStyle(color: Color(0xFF8c8e98), fontSize: 18.0),
-                  ),
-                ),
-                SizedBox(height: 40.0),
-                Text(
-                  "or LogIn with",
-                  style: TextStyle(color: Color(0xFF273671), fontSize: 22.0),
-                ),
-                SizedBox(height: 30.0),
-                GestureDetector(
-                  onTap: () {
-                    signInWithGoogle(context);
-                  },
-                  child: Image.asset(
-                    "assets/google.png.png",
-                    height: 45,
-                    width: 45,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                SizedBox(height: 40.0),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text("Don't have an account?", style: TextStyle(color: Color(0xFF8c8e98), fontSize: 18.0)),
-                    SizedBox(width: 5.0),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => SignUp()));
-                      },
-                      child: Text("SignUp", style: TextStyle(color: Color(0xFF273671), fontSize: 20.0)),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          Positioned(
-            top: 20.0,
-            right: 20.0,
-            child: GestureDetector(
-              onTap: () {
-                print("Profile tapped"); // Add navigation or profile action here
-              },
-              child: CircleAvatar(
-                radius: 25.0,
-                backgroundImage: AssetImage("assets/avatar.png.png"), // Updated path for image
+                ],
               ),
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget buildInputField({
-    required TextEditingController controller,
-    required String hintText,
-    bool obscureText = false,
-    String? Function(String?)? validator,
-  }) {
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 2.0, horizontal: 30.0),
-      decoration: BoxDecoration(
-        color: Color(0xFFedf0f8),
-        borderRadius: BorderRadius.circular(30),
-      ),
-      child: TextFormField(
-        controller: controller,
-        obscureText: obscureText,
-        validator: validator,
-        decoration: InputDecoration(
-          border: InputBorder.none,
-          hintText: hintText,
-          hintStyle: TextStyle(color: Color(0xFFb2b7bf), fontSize: 18.0),
         ),
       ),
     );
   }
 
-  Widget buildSignInButton(String text, BuildContext context) {
+  Widget _buildInputField({
+    required TextEditingController controller,
+    required String hintText,
+    required IconData icon,
+    bool obscureText = false,
+    String? Function(String?)? validator,
+  }) {
     return Container(
-      width: MediaQuery.of(context).size.width,
-      padding: EdgeInsets.symmetric(vertical: 13.0, horizontal: 30.0),
       decoration: BoxDecoration(
-        color: Colors.blue,
-        borderRadius: BorderRadius.circular(30),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: Offset(0, 5),
+          ),
+        ],
       ),
-      child: Center(
+      child: TextFormField(
+        controller: controller,
+        obscureText: obscureText,
+        validator: validator,
+        style: GoogleFonts.poppins(
+          fontSize: 16,
+          color: Colors.black87,
+        ),
+        decoration: InputDecoration(
+          prefixIcon: Icon(
+            icon,
+            color: Colors.deepOrange.shade400,
+          ),
+          hintText: hintText,
+          hintStyle: GoogleFonts.poppins(
+            color: Colors.grey.shade400,
+            fontSize: 16,
+          ),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(15),
+            borderSide: BorderSide.none,
+          ),
+          filled: true,
+          fillColor: Colors.white,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoginButton(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      height: 55,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Colors.orange.shade400,
+            Colors.deepOrange.shade400,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.orange.withOpacity(0.3),
+            spreadRadius: 1,
+            blurRadius: 8,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      child: ElevatedButton(
+        onPressed: () {
+          if (_formkey.currentState!.validate()) {
+            userLogin(context, mailcontroller.text, passwordcontroller.text);
+          }
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+        ),
         child: Text(
-          text,
-          style: TextStyle(color: Colors.white, fontSize: 22.0),
+          "Login",
+          style: GoogleFonts.poppins(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
     );
