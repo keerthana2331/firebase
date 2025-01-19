@@ -1,7 +1,6 @@
  // Update the path if needed
 import 'package:authenticationapp/front_page.dart';
-import 'package:authenticationapp/home.dart';
-import 'package:authenticationapp/login_page.dart';
+
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';

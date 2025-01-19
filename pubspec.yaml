@@ -25,6 +25,7 @@ dependencies:
   intl: ^0.20.1
   shared_preferences: ^2.3.5
   google_fonts: ^6.2.1
+  provider: ^6.1.2
   
  
 
@@ -38,7 +39,6 @@ flutter:
 
   assets:
     - assets/google.png.png
-    - assets/apple.png.png
     - assets/firebase.png.png
     - assets/avatar.png.png
-    - assets/Screenshot 2025-01-17 011604-Photoroom.png
+    
