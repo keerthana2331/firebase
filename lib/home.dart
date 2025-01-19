@@ -1,4 +1,4 @@
-// ignore_for_file: unused_element
+// ignore_for_file: use_build_context_synchronously, deprecated_member_use
 
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -12,25 +12,25 @@ class Home extends StatelessWidget {
   const Home({super.key});
 
   static const List<Color> noteColors = [
-    Color(0xFFffab91), // Peach
-    Color(0xFFfff59d), // Light Yellow
-    Color(0xFFb2dfdb), // Mint
-    Color(0xFFe1bee7), // Light Purple
-    Color(0xFFbbdefb), // Light Blue
-    Color(0xFFf8bbd0), // Pink
+    Color(0xFFffab91),
+    Color(0xFFfff59d),
+    Color(0xFFb2dfdb),
+    Color(0xFFe1bee7),
+    Color(0xFFbbdefb),
+    Color(0xFFf8bbd0),
   ];
 
-  Future<void> _saveViewPreference(bool isGrid) async {
+  Future<void> saveViewPreference(bool isGrid) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('isGridView', isGrid);
   }
 
-  Future<bool> _getViewPreference() async {
+  Future<bool> getViewPreference() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getBool('isGridView') ?? true;
   }
 
-  Future<void> _signOut(BuildContext context) async {
+  Future<void> signOut(BuildContext context) async {
     try {
       await FirebaseAuth.instance.signOut();
       Navigator.pushAndRemoveUntil(
@@ -47,14 +47,16 @@ class Home extends StatelessWidget {
           ),
           backgroundColor: Colors.deepOrange.shade400,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
           margin: const EdgeInsets.all(10),
         ),
       );
     }
   }
 
-  Future<void> _addOrUpdateNote(BuildContext context, {String? id, String? currentTitle, String? currentContent}) async {
+  Future<void> addOrUpdateNote(BuildContext context,
+      {String? id, String? currentTitle, String? currentContent}) async {
     String? title = currentTitle;
     String? content = currentContent;
     final titleController = TextEditingController(text: currentTitle);
@@ -205,7 +207,8 @@ class Home extends StatelessWidget {
                     ),
                     child: ElevatedButton(
                       onPressed: () async {
-                        if (title?.isNotEmpty == true && content?.isNotEmpty == true) {
+                        if (title?.isNotEmpty == true &&
+                            content?.isNotEmpty == true) {
                           final firestore = FirebaseFirestore.instance;
                           if (id == null) {
                             await firestore.collection('notes').add({
@@ -227,7 +230,8 @@ class Home extends StatelessWidget {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.transparent,
                         shadowColor: Colors.transparent,
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 12),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(15),
                         ),
@@ -271,7 +275,6 @@ class Home extends StatelessWidget {
             children: [
               Container(
                 padding: const EdgeInsets.all(16),
-                
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -296,24 +299,25 @@ class Home extends StatelessWidget {
                         Icons.logout_rounded,
                         color: Colors.deepOrange.shade400,
                       ),
-                      onPressed: () => _signOut(context),
+                      onPressed: () => signOut(context),
                     ),
                   ],
                 ),
               ),
               Expanded(
                 child: FutureBuilder<bool>(
-                  future: _getViewPreference(),
+                  future: getViewPreference(),
                   builder: (context, snapshot) {
                     final isGrid = snapshot.data ?? true;
-                    
+
                     return StreamBuilder<QuerySnapshot>(
                       stream: FirebaseFirestore.instance
                           .collection('notes')
                           .orderBy('timestamp', descending: true)
                           .snapshots(),
                       builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
                           return Center(
                             child: CircularProgressIndicator(
                               valueColor: AlwaysStoppedAnimation<Color>(
@@ -369,7 +373,8 @@ class Home extends StatelessWidget {
                         if (isGrid) {
                           return GridView.builder(
                             padding: const EdgeInsets.all(16),
-                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
                               crossAxisCount: 2,
                               crossAxisSpacing: 16,
                               mainAxisSpacing: 16,
@@ -378,10 +383,13 @@ class Home extends StatelessWidget {
                             itemCount: notes.length,
                             itemBuilder: (context, index) {
                               final note = notes[index];
-                              final noteData = note.data() as Map<String, dynamic>;
-                              final colorIndex = noteData['colorIndex'] ?? index % noteColors.length;
-                              
-                              return _buildNoteCard(context, note.id, noteData, noteColors[colorIndex]);
+                              final noteData =
+                                  note.data() as Map<String, dynamic>;
+                              final colorIndex = noteData['colorIndex'] ??
+                                  index % noteColors.length;
+
+                              return buildNoteCard(context, note.id, noteData,
+                                  noteColors[colorIndex]);
                             },
                           );
                         } else {
@@ -390,12 +398,15 @@ class Home extends StatelessWidget {
                             itemCount: notes.length,
                             itemBuilder: (context, index) {
                               final note = notes[index];
-                              final noteData = note.data() as Map<String, dynamic>;
-                              final colorIndex = noteData['colorIndex'] ?? index % noteColors.length;
-                              
+                              final noteData =
+                                  note.data() as Map<String, dynamic>;
+                              final colorIndex = noteData['colorIndex'] ??
+                                  index % noteColors.length;
+
                               return Padding(
                                 padding: const EdgeInsets.only(bottom: 16),
-                                child: _buildNoteCard(context, note.id, noteData, noteColors[colorIndex]),
+                                child: buildNoteCard(context, note.id, noteData,
+                                    noteColors[colorIndex]),
                               );
                             },
                           );
@@ -428,7 +439,7 @@ class Home extends StatelessWidget {
           ],
         ),
         child: FloatingActionButton(
-          onPressed: () => _addOrUpdateNote(context),
+          onPressed: () => addOrUpdateNote(context),
           elevation: 0,
           backgroundColor: Colors.transparent,
           child: const Icon(Icons.add),
@@ -436,88 +447,89 @@ class Home extends StatelessWidget {
       ),
     );
   }
-   Widget _buildNoteCard(BuildContext context, String id, Map<String, dynamic> noteData, Color color) {
-  final timestamp = noteData['timestamp'] as Timestamp?;
-  final formattedTime = timestamp != null
-      ? DateFormat('MMM dd, yyyy').format(timestamp.toDate())
-      : 'Unknown Date';
 
-  return GestureDetector(
-    onTap: () => _addOrUpdateNote(
-      context,
-      id: id,
-      currentTitle: noteData['title'] as String?,
-      currentContent: noteData['content'] as String?,
-    ),
-    onLongPress: () => _deleteNoteDialog(context, id),
-    child: Container(
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(15),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 5),
-          ),
-        ],
+  Widget buildNoteCard(BuildContext context, String id,
+      Map<String, dynamic> noteData, Color color) {
+    final timestamp = noteData['timestamp'] as Timestamp?;
+    final formattedTime = timestamp != null
+        ? DateFormat('MMM dd, yyyy').format(timestamp.toDate())
+        : 'Unknown Date';
+
+    return GestureDetector(
+      onTap: () => addOrUpdateNote(
+        context,
+        id: id,
+        currentTitle: noteData['title'] as String?,
+        currentContent: noteData['content'] as String?,
       ),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Text(
-                  noteData['title'] ?? 'Untitled',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.poppins(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+      onLongPress: () => deleteNoteDialog(context, id),
+      child: Container(
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(15),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 10,
+              offset: const Offset(0, 5),
+            ),
+          ],
+        ),
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    noteData['title'] ?? 'Untitled',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.poppins(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
                   ),
                 ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.delete, color: Colors.redAccent),
-                onPressed: () => _deleteNoteDialog(context, id),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Expanded(
-            child: Text(
-              noteData['content'] ?? '',
-              maxLines: 4,
-              overflow: TextOverflow.ellipsis,
-              style: GoogleFonts.poppins(
-                fontSize: 14,
-                color: Colors.black54,
+                IconButton(
+                  icon: const Icon(Icons.delete, color: Colors.redAccent),
+                  onPressed: () => deleteNoteDialog(context, id),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Expanded(
+              child: Text(
+                noteData['content'] ?? '',
+                maxLines: 4,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  color: Colors.black54,
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 8),
-          Align(
-            alignment: Alignment.bottomRight,
-            child: Text(
-              formattedTime,
-              style: GoogleFonts.poppins(
-                fontSize: 12,
-                color: Colors.black45,
+            const SizedBox(height: 8),
+            Align(
+              alignment: Alignment.bottomRight,
+              child: Text(
+                formattedTime,
+                style: GoogleFonts.poppins(
+                  fontSize: 12,
+                  color: Colors.black45,
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
-
-  Future<void> _deleteNoteDialog(BuildContext context, String id) async {
+  Future<void> deleteNoteDialog(BuildContext context, String id) async {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -541,7 +553,10 @@ class Home extends StatelessWidget {
           TextButton(
             onPressed: () async {
               Navigator.pop(context);
-              await FirebaseFirestore.instance.collection('notes').doc(id).delete();
+              await FirebaseFirestore.instance
+                  .collection('notes')
+                  .doc(id)
+                  .delete();
             },
             child: Text(
               'Delete',

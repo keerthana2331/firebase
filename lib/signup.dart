@@ -1,4 +1,7 @@
+// ignore_for_file: deprecated_member_use, prefer_const_constructors, use_build_context_synchronously, unused_local_variable
+
 import 'package:authenticationapp/front_page.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -15,14 +18,14 @@ class SignUp extends StatelessWidget {
   final TextEditingController nameController = TextEditingController();
   final GoogleSignIn _googleSignIn = GoogleSignIn();
 
-  Future<void> _logoutCurrentUser() async {
+  Future<void> logoutCurrentUser() async {
     await FirebaseAuth.instance.signOut();
     await _googleSignIn.signOut();
   }
 
   Future<void> signUpWithGoogle(BuildContext context) async {
     try {
-      await _logoutCurrentUser();
+      await logoutCurrentUser();
       GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
 
       if (googleUser != null) {
@@ -35,24 +38,36 @@ class SignUp extends StatelessWidget {
         Navigator.pushReplacement(context, CustomPageRoute(child: Home()));
       }
     } catch (e) {
-      _showErrorSnackBar(context, 'google-sign-up-failed');
+      showErrorSnackBar(context, 'google-sign-up-failed');
     }
   }
 
-  Future<void> userSignUp(BuildContext context) async {
-    try {
-      await _logoutCurrentUser();
-      await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: emailController.text,
-        password: passwordController.text,
-      );
-      Navigator.pushReplacement(context, CustomPageRoute(child: Home()));
-    } on FirebaseAuthException catch (e) {
-      _showErrorSnackBar(context, e.code);
-    }
-  }
+ Future<void> signUpUser(String email, String password, BuildContext context) async {
+  try {
+    UserCredential userCredential = await FirebaseAuth.instance
+        .createUserWithEmailAndPassword(email: email, password: password);
 
-  void _showErrorSnackBar(BuildContext context, String code) {
+    // Save the email to Firestore or Realtime Database
+    await FirebaseFirestore.instance.collection('registeredUsers').doc(email).set({
+      'email': email,
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        backgroundColor: Colors.green,
+        content: Text(
+          "Account created successfully!",
+          style: TextStyle(fontSize: 18.0),
+        )));
+  } on FirebaseAuthException catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        backgroundColor: Colors.red,
+        content: Text(
+          e.message ?? "An error occurred",
+          style: const TextStyle(fontSize: 18.0),
+        )));
+  }
+}
+  void showErrorSnackBar(BuildContext context, String code) {
     String message = "An error occurred";
     if (code == 'email-already-in-use') {
       message = "Email is already registered";
@@ -61,7 +76,7 @@ class SignUp extends StatelessWidget {
     } else if (code == 'google-sign-up-failed') {
       message = "Google sign up failed";
     }
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         behavior: SnackBarBehavior.floating,
@@ -104,7 +119,6 @@ class SignUp extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Back Button
                   TweenAnimationBuilder(
                     tween: Tween<double>(begin: 0, end: 1),
                     duration: const Duration(milliseconds: 800),
@@ -124,10 +138,7 @@ class SignUp extends StatelessWidget {
                       );
                     },
                   ),
-
                   const SizedBox(height: 20),
-
-                  // Profile Picture and Title
                   TweenAnimationBuilder(
                     tween: Tween<double>(begin: 0, end: 1),
                     duration: const Duration(milliseconds: 1000),
@@ -151,7 +162,8 @@ class SignUp extends StatelessWidget {
                                 child: CircleAvatar(
                                   radius: 50,
                                   backgroundColor: Colors.white,
-                                  backgroundImage: const AssetImage('assets/avatar.png.png'),
+                                  backgroundImage:
+                                      const AssetImage('assets/avatar.png.png'),
                                 ),
                               ),
                               const SizedBox(height: 20),
@@ -177,15 +189,11 @@ class SignUp extends StatelessWidget {
                       );
                     },
                   ),
-
                   const SizedBox(height: 40),
-
-                  // Sign Up Form
                   Form(
                     key: _formKey,
                     child: Column(
                       children: [
-                        // Name Field
                         TweenAnimationBuilder(
                           tween: Tween<double>(begin: 0, end: 1),
                           duration: const Duration(milliseconds: 1200),
@@ -194,7 +202,7 @@ class SignUp extends StatelessWidget {
                               offset: Offset(0, 50 * (1 - value)),
                               child: Opacity(
                                 opacity: value,
-                                child: _buildInputField(
+                                child: buildInputField(
                                   controller: nameController,
                                   hintText: "Name",
                                   icon: Icons.person_rounded,
@@ -203,10 +211,7 @@ class SignUp extends StatelessWidget {
                             );
                           },
                         ),
-
                         const SizedBox(height: 20),
-
-                        // Email Field
                         TweenAnimationBuilder(
                           tween: Tween<double>(begin: 0, end: 1),
                           duration: const Duration(milliseconds: 1400),
@@ -215,7 +220,7 @@ class SignUp extends StatelessWidget {
                               offset: Offset(0, 50 * (1 - value)),
                               child: Opacity(
                                 opacity: value,
-                                child: _buildInputField(
+                                child: buildInputField(
                                   controller: emailController,
                                   hintText: "Email",
                                   icon: Icons.email_rounded,
@@ -224,10 +229,7 @@ class SignUp extends StatelessWidget {
                             );
                           },
                         ),
-
                         const SizedBox(height: 20),
-
-                        // Password Field
                         TweenAnimationBuilder(
                           tween: Tween<double>(begin: 0, end: 1),
                           duration: const Duration(milliseconds: 1600),
@@ -236,7 +238,7 @@ class SignUp extends StatelessWidget {
                               offset: Offset(0, 50 * (1 - value)),
                               child: Opacity(
                                 opacity: value,
-                                child: _buildInputField(
+                                child: buildInputField(
                                   controller: passwordController,
                                   hintText: "Password",
                                   icon: Icons.lock_rounded,
@@ -246,24 +248,18 @@ class SignUp extends StatelessWidget {
                             );
                           },
                         ),
-
                         const SizedBox(height: 40),
-
-                        // Sign Up Button
                         TweenAnimationBuilder(
                           tween: Tween<double>(begin: 0, end: 1),
                           duration: const Duration(milliseconds: 1800),
                           builder: (context, double value, child) {
                             return Transform.scale(
                               scale: value,
-                              child: _buildSignUpButton(context),
+                              child: buildSignUpButton(context),
                             );
                           },
                         ),
-
                         const SizedBox(height: 30),
-
-                        // Google Sign Up
                         TweenAnimationBuilder(
                           tween: Tween<double>(begin: 0, end: 1),
                           duration: const Duration(milliseconds: 2000),
@@ -289,7 +285,8 @@ class SignUp extends StatelessWidget {
                                         borderRadius: BorderRadius.circular(15),
                                         boxShadow: [
                                           BoxShadow(
-                                            color: Colors.black.withOpacity(0.1),
+                                            color:
+                                                Colors.black.withOpacity(0.1),
                                             blurRadius: 10,
                                             offset: Offset(0, 5),
                                           ),
@@ -306,10 +303,7 @@ class SignUp extends StatelessWidget {
                             );
                           },
                         ),
-
                         const SizedBox(height: 30),
-
-                        // Login Link
                         TweenAnimationBuilder(
                           tween: Tween<double>(begin: 0, end: 1),
                           duration: const Duration(milliseconds: 2200),
@@ -357,7 +351,7 @@ class SignUp extends StatelessWidget {
     );
   }
 
-  Widget _buildInputField({
+  Widget buildInputField({
     required TextEditingController controller,
     required String hintText,
     required IconData icon,
@@ -415,7 +409,7 @@ class SignUp extends StatelessWidget {
     );
   }
 
-  Widget _buildSignUpButton(BuildContext context) {
+  Widget buildSignUpButton(BuildContext context) {
     return Container(
       width: double.infinity,
       height: 55,
@@ -439,7 +433,7 @@ class SignUp extends StatelessWidget {
       child: ElevatedButton(
         onPressed: () {
           if (_formKey.currentState!.validate()) {
-            userSignUp(context);
+            signUpUser(emailController.text, passwordController.text, context);
           }
         },
         style: ElevatedButton.styleFrom(

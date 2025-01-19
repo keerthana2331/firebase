@@ -1,13 +1,15 @@
+// ignore_for_file: use_build_context_synchronously, prefer_const_constructors
+
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:authenticationapp/home.dart';
 import 'package:authenticationapp/signup.dart';
-import 'package:authenticationapp/forget_password.dart';
-import 'package:authenticationapp/front_page.dart';
+import 'package:authenticationapp/forget_password.dart' as forget_password;
+import 'package:authenticationapp/front_page.dart' as front_page;
 
-// Reuse the same CustomPageRoute for consistent transitions
 class LogIn extends StatelessWidget {
   LogIn({super.key});
 
@@ -16,32 +18,31 @@ class LogIn extends StatelessWidget {
   final _formkey = GlobalKey<FormState>();
   final GoogleSignIn _googleSignIn = GoogleSignIn();
 
-  Future<void> _logoutCurrentUser() async {
+  Future<void> logoutCurrentUser() async {
     await FirebaseAuth.instance.signOut();
     await _googleSignIn.signOut();
   }
 
-  Future<void> userLogin(BuildContext context, String email, String password) async {
+  Future<void> userLogin(
+      BuildContext context, String email, String password) async {
     try {
-      await _logoutCurrentUser();
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: email, 
-        password: password
-      );
-      Navigator.push(context, CustomPageRoute(child: Home()));
+      await logoutCurrentUser();
+      await FirebaseAuth.instance
+          .signInWithEmailAndPassword(email: email, password: password);
+      Navigator.push(context, front_page.CustomPageRoute(child: Home()));
     } on FirebaseAuthException catch (e) {
-      _showErrorSnackBar(context, e.code);
+      showErrorSnackBar(context, e.code);
     }
   }
 
-  void _showErrorSnackBar(BuildContext context, String code) {
+  void showErrorSnackBar(BuildContext context, String code) {
     String message = "An error occurred";
     if (code == 'user-not-found') {
       message = "No User Found for that Email";
     } else if (code == 'wrong-password') {
       message = "Wrong Password Provided";
     }
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         behavior: SnackBarBehavior.floating,
@@ -63,20 +64,21 @@ class LogIn extends StatelessWidget {
 
   Future<void> signInWithGoogle(BuildContext context) async {
     try {
-      await _logoutCurrentUser();
+      await logoutCurrentUser();
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       if (googleUser == null) return;
 
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
       final AuthCredential credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
       await FirebaseAuth.instance.signInWithCredential(credential);
-      Navigator.push(context, CustomPageRoute(child: Home()));
+      Navigator.push(context, front_page.CustomPageRoute(child: Home()));
     } catch (e) {
-      _showErrorSnackBar(context, "google-sign-in-failed");
+      showErrorSnackBar(context, "google-sign-in-failed");
     }
   }
 
@@ -103,7 +105,6 @@ class LogIn extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Back Button
                   TweenAnimationBuilder(
                     tween: Tween<double>(begin: 0, end: 1),
                     duration: const Duration(milliseconds: 800),
@@ -117,16 +118,13 @@ class LogIn extends StatelessWidget {
                           ),
                           onPressed: () => Navigator.pushReplacement(
                             context,
-                            CustomPageRoute(child: ToDoListIntro()),
+                            front_page.CustomPageRoute(child: front_page.ToDoListIntro()),
                           ),
                         ),
                       );
                     },
                   ),
-
                   const SizedBox(height: 40),
-
-                  // Welcome Text
                   TweenAnimationBuilder(
                     tween: Tween<double>(begin: 0, end: 1),
                     duration: const Duration(milliseconds: 1000),
@@ -147,10 +145,7 @@ class LogIn extends StatelessWidget {
                       );
                     },
                   ),
-
                   const SizedBox(height: 40),
-
-                  // Login Form
                   Form(
                     key: _formkey,
                     child: Column(
@@ -163,7 +158,7 @@ class LogIn extends StatelessWidget {
                               offset: Offset(0, 50 * (1 - value)),
                               child: Opacity(
                                 opacity: value,
-                                child: _buildInputField(
+                                child: buildInputField(
                                   controller: mailcontroller,
                                   hintText: "Email",
                                   icon: Icons.email_rounded,
@@ -175,9 +170,7 @@ class LogIn extends StatelessWidget {
                             );
                           },
                         ),
-
                         const SizedBox(height: 20),
-
                         TweenAnimationBuilder(
                           tween: Tween<double>(begin: 0, end: 1),
                           duration: const Duration(milliseconds: 1400),
@@ -186,7 +179,7 @@ class LogIn extends StatelessWidget {
                               offset: Offset(0, 50 * (1 - value)),
                               child: Opacity(
                                 opacity: value,
-                                child: _buildInputField(
+                                child: buildInputField(
                                   controller: passwordcontroller,
                                   hintText: "Password",
                                   icon: Icons.lock_rounded,
@@ -199,24 +192,18 @@ class LogIn extends StatelessWidget {
                             );
                           },
                         ),
-
                         const SizedBox(height: 30),
-
-                        // Login Button
                         TweenAnimationBuilder(
                           tween: Tween<double>(begin: 0, end: 1),
                           duration: const Duration(milliseconds: 1600),
                           builder: (context, double value, child) {
                             return Transform.scale(
                               scale: value,
-                              child: _buildLoginButton(context),
+                              child: buildLoginButton(context),
                             );
                           },
                         ),
-
                         const SizedBox(height: 20),
-
-                        // Forgot Password
                         TweenAnimationBuilder(
                           tween: Tween<double>(begin: 0, end: 1),
                           duration: const Duration(milliseconds: 1800),
@@ -226,7 +213,7 @@ class LogIn extends StatelessWidget {
                               child: TextButton(
                                 onPressed: () => Navigator.push(
                                   context,
-                                  CustomPageRoute(child: ForgotPassword()),
+                                  front_page.CustomPageRoute(child: forget_password.ForgotPassword()),
                                 ),
                                 child: Text(
                                   "Forgot Password?",
@@ -239,10 +226,7 @@ class LogIn extends StatelessWidget {
                             );
                           },
                         ),
-
                         const SizedBox(height: 30),
-
-                        // Google Sign In
                         TweenAnimationBuilder(
                           tween: Tween<double>(begin: 0, end: 1),
                           duration: const Duration(milliseconds: 2000),
@@ -268,7 +252,8 @@ class LogIn extends StatelessWidget {
                                         borderRadius: BorderRadius.circular(15),
                                         boxShadow: [
                                           BoxShadow(
-                                            color: Colors.black.withOpacity(0.1),
+                                            color:
+                                                Colors.black.withOpacity(0.1),
                                             blurRadius: 10,
                                             offset: Offset(0, 5),
                                           ),
@@ -285,10 +270,7 @@ class LogIn extends StatelessWidget {
                             );
                           },
                         ),
-
                         const SizedBox(height: 30),
-
-                        // Sign Up Link
                         TweenAnimationBuilder(
                           tween: Tween<double>(begin: 0, end: 1),
                           duration: const Duration(milliseconds: 2200),
@@ -308,7 +290,7 @@ class LogIn extends StatelessWidget {
                                   GestureDetector(
                                     onTap: () => Navigator.push(
                                       context,
-                                      CustomPageRoute(child: SignUp()),
+                                      front_page.CustomPageRoute(child: SignUp()),
                                     ),
                                     child: Text(
                                       "Sign Up",
@@ -336,7 +318,7 @@ class LogIn extends StatelessWidget {
     );
   }
 
-  Widget _buildInputField({
+  Widget buildInputField({
     required TextEditingController controller,
     required String hintText,
     required IconData icon,
@@ -384,7 +366,7 @@ class LogIn extends StatelessWidget {
     );
   }
 
-  Widget _buildLoginButton(BuildContext context) {
+  Widget buildLoginButton(BuildContext context) {
     return Container(
       width: double.infinity,
       height: 55,

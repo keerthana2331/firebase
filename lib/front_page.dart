@@ -1,9 +1,10 @@
+// ignore_for_file: deprecated_member_use, prefer_const_constructors
+
 import 'dart:math';
 import 'package:authenticationapp/login_page.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-// Custom Page Route for transition
 class CustomPageRoute extends PageRouteBuilder {
   final Widget child;
   CustomPageRoute({required this.child})
@@ -15,7 +16,7 @@ class CustomPageRoute extends PageRouteBuilder {
               parent: animation,
               curve: Curves.easeInOutCubic,
             );
-            
+
             return Stack(
               children: [
                 FadeTransition(
@@ -61,7 +62,6 @@ class ToDoListIntro extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Animated Custom Sticky Note Stack
                 TweenAnimationBuilder(
                   tween: Tween<double>(begin: 0, end: 1),
                   duration: const Duration(milliseconds: 800),
@@ -73,7 +73,6 @@ class ToDoListIntro extends StatelessWidget {
                         child: Stack(
                           alignment: Alignment.center,
                           children: [
-                            // Background notes for depth
                             Transform.translate(
                               offset: const Offset(-15, -15),
                               child: Transform.rotate(
@@ -116,7 +115,6 @@ class ToDoListIntro extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            // Main note with lines
                             Container(
                               height: 120,
                               width: 120,
@@ -138,19 +136,22 @@ class ToDoListIntro extends StatelessWidget {
                                     height: 2,
                                     width: 80,
                                     color: Colors.grey.withOpacity(0.3),
-                                    margin: const EdgeInsets.symmetric(vertical: 4),
+                                    margin:
+                                        const EdgeInsets.symmetric(vertical: 4),
                                   ),
                                   Container(
                                     height: 2,
                                     width: 60,
                                     color: Colors.grey.withOpacity(0.3),
-                                    margin: const EdgeInsets.symmetric(vertical: 4),
+                                    margin:
+                                        const EdgeInsets.symmetric(vertical: 4),
                                   ),
                                   Container(
                                     height: 2,
                                     width: 70,
                                     color: Colors.grey.withOpacity(0.3),
-                                    margin: const EdgeInsets.symmetric(vertical: 4),
+                                    margin:
+                                        const EdgeInsets.symmetric(vertical: 4),
                                   ),
                                 ],
                               ),
@@ -162,8 +163,6 @@ class ToDoListIntro extends StatelessWidget {
                   },
                 ),
                 const SizedBox(height: 40.0),
-
-                // Animated Title with Bounce
                 TweenAnimationBuilder(
                   tween: Tween<double>(begin: 0, end: 1),
                   duration: const Duration(milliseconds: 1000),
@@ -191,8 +190,6 @@ class ToDoListIntro extends StatelessWidget {
                   },
                 ),
                 const SizedBox(height: 15.0),
-
-                // Animated Firebase Badge
                 TweenAnimationBuilder(
                   tween: Tween<double>(begin: 0, end: 1),
                   duration: const Duration(milliseconds: 1200),
@@ -245,8 +242,6 @@ class ToDoListIntro extends StatelessWidget {
                   },
                 ),
                 const SizedBox(height: 60.0),
-
-                // Bouncing Button
                 TweenAnimationBuilder(
                   tween: Tween<double>(begin: 0, end: 1),
                   duration: const Duration(milliseconds: 1400),
