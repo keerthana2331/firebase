@@ -1,7 +1,10 @@
 // ignore_for_file: unreachable_switch_default, await_only_futures, prefer_const_constructors, use_build_context_synchronously, non_constant_identifier_names
 
+
+
 import 'package:authenticationapp/database.dart';
-import 'package:authenticationapp/home.dart';
+import 'package:authenticationapp/screens/homepage.dart';
+
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -47,6 +50,20 @@ class AuthMethods {
         Navigator.push(
             context, MaterialPageRoute(builder: (context) => Home()));
       });
+    }
+  }
+}
+
+class AuthService {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  // Send password reset email
+  Future<void> sendPasswordResetEmail(String email) async {
+    try {
+      await _auth.sendPasswordResetEmail(email: email);
+    } on FirebaseAuthException catch (e) {
+      // Handle specific error codes if necessary
+      throw e;
     }
   }
 }

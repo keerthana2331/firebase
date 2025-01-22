@@ -1,12 +1,13 @@
-// ignore_for_file: use_build_context_synchronously, deprecated_member_use
-
+// home.dart
+import 'package:authenticationapp/providers/homescreenprovider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'login_page.dart';
+
+import 'package:authenticationapp/screens/loginpage.dart';
 
 class Home extends StatelessWidget {
   const Home({super.key});
@@ -20,48 +21,93 @@ class Home extends StatelessWidget {
     Color(0xFFf8bbd0),
   ];
 
-  Future<void> saveViewPreference(bool isGrid) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('isGridView', isGrid);
-  }
-
-  Future<bool> getViewPreference() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool('isGridView') ?? true;
-  }
-
   Future<void> signOut(BuildContext context) async {
-    try {
-      await FirebaseAuth.instance.signOut();
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (context) => LogIn()),
-        (Route<dynamic> route) => false,
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Error signing out. Please try again.',
-            style: GoogleFonts.poppins(color: Colors.white),
+    bool confirm = await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        title: Text(
+          'Sign Out',
+          style: GoogleFonts.poppins(
+            fontWeight: FontWeight.bold,
+            color: Colors.deepOrange.shade400,
           ),
-          backgroundColor: Colors.deepOrange.shade400,
-          behavior: SnackBarBehavior.floating,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-          margin: const EdgeInsets.all(10),
         ),
-      );
+        content: Text(
+          'Are you sure you want to sign out?',
+          style: GoogleFonts.poppins(),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(
+              'Cancel',
+              style: GoogleFonts.poppins(
+                color: Colors.grey.shade600,
+              ),
+            ),
+          ),
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Colors.orange.shade400,
+                  Colors.deepOrange.shade400,
+                ],
+              ),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                backgroundColor: Colors.transparent,
+              ),
+              child: Text(
+                'Sign Out',
+                style: GoogleFonts.poppins(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    ) ?? false;
+
+    if (confirm) {
+      try {
+        await FirebaseAuth.instance.signOut();
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => LogIn()),
+          (Route<dynamic> route) => false,
+        );
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Error signing out. Please try again.',
+              style: GoogleFonts.poppins(color: Colors.white),
+            ),
+            backgroundColor: Colors.deepOrange.shade400,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+            margin: const EdgeInsets.all(10),
+          ),
+        );
+      }
     }
   }
 
   Future<void> addOrUpdateNote(BuildContext context,
       {String? id, String? currentTitle, String? currentContent}) async {
+    final notesProvider = Provider.of<NotesProvider>(context, listen: false);
     String? title = currentTitle;
     String? content = currentContent;
     final titleController = TextEditingController(text: currentTitle);
     final contentController = TextEditingController(text: currentContent);
-    final colorIndex = DateTime.now().microsecond % noteColors.length;
 
     await showDialog(
       context: context,
@@ -209,20 +255,10 @@ class Home extends StatelessWidget {
                       onPressed: () async {
                         if (title?.isNotEmpty == true &&
                             content?.isNotEmpty == true) {
-                          final firestore = FirebaseFirestore.instance;
                           if (id == null) {
-                            await firestore.collection('notes').add({
-                              'title': title,
-                              'content': content,
-                              'timestamp': FieldValue.serverTimestamp(),
-                              'colorIndex': colorIndex,
-                            });
+                            await notesProvider.addNote(title!, content!);
                           } else {
-                            await firestore.collection('notes').doc(id).update({
-                              'title': title,
-                              'content': content,
-                              'lastModified': FieldValue.serverTimestamp(),
-                            });
+                            await notesProvider.updateNote(id, title!, content!);
                           }
                           Navigator.pop(context);
                         }
@@ -256,68 +292,74 @@ class Home extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Colors.yellow.shade100,
-              Colors.orange.shade100,
-              Colors.deepOrange.shade100,
-            ],
-            stops: const [0.0, 0.5, 1.0],
-          ),
-        ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    ShaderMask(
-                      shaderCallback: (bounds) => LinearGradient(
-                        colors: [
-                          Colors.orange.shade700,
-                          Colors.deepOrange.shade900,
-                        ],
-                      ).createShader(bounds),
-                      child: Text(
-                        "My Notes",
-                        style: GoogleFonts.poppins(
-                          color: Colors.white,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    IconButton(
-                      icon: Icon(
-                        Icons.logout_rounded,
-                        color: Colors.deepOrange.shade400,
-                      ),
-                      onPressed: () => signOut(context),
-                    ),
-                  ],
-                ),
+    return Consumer<NotesProvider>(
+      builder: (context, notesProvider, child) {
+        return Scaffold(
+          body: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Colors.yellow.shade100,
+                  Colors.orange.shade100,
+                  Colors.deepOrange.shade100,
+                ],
+                stops: const [0.0, 0.5, 1.0],
               ),
-              Expanded(
-                child: FutureBuilder<bool>(
-                  future: getViewPreference(),
-                  builder: (context, snapshot) {
-                    final isGrid = snapshot.data ?? true;
-
-                    return StreamBuilder<QuerySnapshot>(
-                      stream: FirebaseFirestore.instance
-                          .collection('notes')
-                          .orderBy('timestamp', descending: true)
-                          .snapshots(),
+            ),
+            child: SafeArea(
+              child: Column(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        ShaderMask(
+                          shaderCallback: (bounds) => LinearGradient(
+                            colors: [
+                              Colors.orange.shade700,
+                              Colors.deepOrange.shade900,
+                            ],
+                          ).createShader(bounds),
+                          child: Text(
+                            "My Notes",
+                            style: GoogleFonts.poppins(
+                              color: Colors.white,
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        Row(
+                          children: [
+                            IconButton(
+                              icon: Icon(
+                                notesProvider.isGridView
+                                    ? Icons.view_list
+                                    : Icons.grid_view,
+                                color: Colors.deepOrange.shade400,
+                              ),
+                              onPressed: () => notesProvider.toggleView(),
+                            ),
+                            IconButton(
+                              icon: Icon(
+                                Icons.logout_rounded,
+                                color: Colors.deepOrange.shade400,
+                              ),
+                              onPressed: () => signOut(context),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: StreamBuilder<QuerySnapshot>(
+                      stream: notesProvider.getNotesStream(),
                       builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
                           return Center(
                             child: CircularProgressIndicator(
                               valueColor: AlwaysStoppedAnimation<Color>(
@@ -351,8 +393,8 @@ class Home extends StatelessWidget {
                                           fontWeight: FontWeight.bold,
                                           color: Colors.deepOrange.shade400,
                                         ),
+                                        
                                       ),
-                                      const SizedBox(height: 8),
                                       Text(
                                         'Tap + to create your first note',
                                         style: GoogleFonts.poppins(
@@ -370,7 +412,7 @@ class Home extends StatelessWidget {
 
                         final notes = snapshot.data!.docs;
 
-                        if (isGrid) {
+                        if (notesProvider.isGridView) {
                           return GridView.builder(
                             padding: const EdgeInsets.all(16),
                             gridDelegate:
@@ -412,39 +454,39 @@ class Home extends StatelessWidget {
                           );
                         }
                       },
-                    );
-                  },
-                ),
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
-      ),
-      floatingActionButton: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              Colors.orange.shade400,
-              Colors.deepOrange.shade400,
-            ],
-          ),
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.orange.withOpacity(0.3),
-              spreadRadius: 1,
-              blurRadius: 8,
-              offset: const Offset(0, 4),
             ),
-          ],
-        ),
-        child: FloatingActionButton(
-          onPressed: () => addOrUpdateNote(context),
-          elevation: 0,
-          backgroundColor: Colors.transparent,
-          child: const Icon(Icons.add),
-        ),
-      ),
+          ),
+          floatingActionButton: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Colors.orange.shade400,
+                  Colors.deepOrange.shade400,
+                ],
+              ),
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.orange.withOpacity(0.3),
+                  spreadRadius: 1,
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: FloatingActionButton(
+              onPressed: () => addOrUpdateNote(context),
+              elevation: 0,
+              backgroundColor: Colors.transparent,
+              child: const Icon(Icons.add),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -530,6 +572,8 @@ class Home extends StatelessWidget {
   }
 
   Future<void> deleteNoteDialog(BuildContext context, String id) async {
+    final notesProvider = Provider.of<NotesProvider>(context, listen: false);
+    
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -553,10 +597,7 @@ class Home extends StatelessWidget {
           TextButton(
             onPressed: () async {
               Navigator.pop(context);
-              await FirebaseFirestore.instance
-                  .collection('notes')
-                  .doc(id)
-                  .delete();
+              await notesProvider.deleteNote(id);
             },
             child: Text(
               'Delete',
