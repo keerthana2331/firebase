@@ -145,33 +145,41 @@ class LogIn extends StatelessWidget {
   }
 
   Widget buildPasswordField(TextEditingController passwordController, LoginState loginState) {
-    return TextFormField(
-      controller: passwordController,
-      obscureText: true,
-      style: GoogleFonts.poppins(fontSize: 16, color: Colors.black87),
-      decoration: InputDecoration(
-        prefixIcon: Icon(Icons.lock_rounded, color: Colors.deepOrange.shade400),
-        hintText: "Password",
-        errorText: loginState.passwordError,
-        hintStyle: GoogleFonts.poppins(color: Colors.grey.shade400, fontSize: 16),
-        filled: true,
-        fillColor: Colors.white,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(15),
-          borderSide: BorderSide.none,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(15),
-          borderSide: BorderSide.none,
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(15),
-          borderSide: BorderSide(color: Colors.red.shade400),
-        ),
+  return TextFormField(
+    controller: passwordController,
+    obscureText: !loginState.isPasswordVisible,
+    style: GoogleFonts.poppins(fontSize: 16, color: Colors.black87),
+    decoration: InputDecoration(
+      prefixIcon: Icon(Icons.lock_rounded, color: Colors.deepOrange.shade400),
+      hintText: "Password",
+      errorText: loginState.passwordError,
+      hintStyle: GoogleFonts.poppins(color: Colors.grey.shade400, fontSize: 16),
+      filled: true,
+      fillColor: Colors.white,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(15),
+        borderSide: BorderSide.none,
       ),
-      onChanged: (value) => loginState.validatePassword(value),
-    );
-  }
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(15),
+        borderSide: BorderSide.none,
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(15),
+        borderSide: BorderSide(color: Colors.red.shade400),
+      ),
+      suffixIcon: IconButton(
+        icon: Icon(
+          loginState.isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+          color: Colors.deepOrange.shade400,
+        ),
+        onPressed: () => loginState.togglePasswordVisibility(),
+      ),
+    ),
+    onChanged: (value) => loginState.validatePassword(value),
+  );
+}
+
 
   Widget buildLoginButton(BuildContext context, LoginState loginState, TextEditingController mailController, TextEditingController passwordController) {
     return Container(

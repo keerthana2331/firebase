@@ -1,5 +1,6 @@
 // forgot_password_screen.dart
 import 'package:authenticationapp/providers/forgetpassword_provider.dart';
+import 'package:authenticationapp/routes/forgetpasswordcustom.dart' as custom_route;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -111,7 +112,7 @@ class ForgotPassword extends StatelessWidget {
             ),
             onPressed: () => Navigator.pushReplacement(
               context,
-              CustomPageRoute(child: LogIn()),
+              custom_route.CustomPageRoute(child: LogIn()),
             ),
           ),
         );
@@ -310,7 +311,7 @@ class ForgotPassword extends StatelessWidget {
                     );
                     Navigator.pushReplacement(
                       context,
-                      CustomPageRoute(child: LogIn()),
+                      custom_route.CustomPageRoute(child: const LogIn()),
                     );
                   }
                 }
@@ -357,7 +358,7 @@ class ForgotPassword extends StatelessWidget {
               GestureDetector(
                 onTap: () => Navigator.pushReplacement(
                   context,
-                  CustomPageRoute(child: SignUp()),
+                  custom_route.CustomPageRoute(child: SignUp()),
                 ),
                 child: Text(
                   "Sign Up",

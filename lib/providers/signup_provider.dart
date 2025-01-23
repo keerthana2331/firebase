@@ -1,11 +1,12 @@
 import 'package:authenticationapp/screens/homepage.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SignUpState extends ChangeNotifier {
   bool _isLoading = false;
+  bool _isPasswordVisible = false; // This field controls the password visibility
   String? _nameError;
   String? _emailError;
   String? _passwordError;
@@ -13,9 +14,16 @@ class SignUpState extends ChangeNotifier {
 
   // Getters
   bool get isLoading => _isLoading;
+  bool get isPasswordVisible => _isPasswordVisible; // Getter for password visibility
   String? get nameError => _nameError;
   String? get emailError => _emailError;
   String? get passwordError => _passwordError;
+
+  // Toggle password visibility
+  void togglePasswordVisibility() {
+    _isPasswordVisible = !_isPasswordVisible;
+    notifyListeners();
+  }
 
   // Validate name
   void validateName(String value) {
@@ -49,7 +57,7 @@ class SignUpState extends ChangeNotifier {
     if (value.isEmpty) {
       _passwordError = 'Please enter your password';
     } else if (value.length < 8) {
-      _passwordError = 'Password must be at least 8 characters long';
+      _passwordError = 'Password must be at least 6 characters long';
     } else if (!passwordRegex.hasMatch(value)) {
       _passwordError =
           'Password must include uppercase, lowercase, number, and special character';

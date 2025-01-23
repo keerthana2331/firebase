@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:authenticationapp/screens/loginpage.dart';
-
-import 'package:authenticationapp/providers/signup_provider.dart'; // Make sure to create this file
+import 'package:authenticationapp/providers/signup_provider.dart'; // Ensure this file exists
 
 class SignUp extends StatelessWidget {
   SignUp({super.key});
@@ -12,6 +11,7 @@ class SignUp extends StatelessWidget {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController nameController = TextEditingController();
+  bool isPasswordVisible = false; // Track password visibility
 
   @override
   Widget build(BuildContext context) {
@@ -37,30 +37,11 @@ class SignUp extends StatelessWidget {
                 child: SafeArea(
                   child: SingleChildScrollView(
                     child: Padding(
-                      padding: const EdgeInsets.all(42.0),
+                      padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 85.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          TweenAnimationBuilder(
-                            tween: Tween<double>(begin: 0, end: 1),
-                            duration: const Duration(milliseconds: 800),
-                            builder: (context, double value, child) {
-                              return Opacity(
-                                opacity: value,
-                                child: IconButton(
-                                  icon: Icon(
-                                    Icons.arrow_back_ios_rounded,
-                                    color: Colors.deepOrange.shade400,
-                                  ),
-                                  onPressed: () => Navigator.pushReplacement(
-                                    context,
-                                    CustomPageRoute(child: LogIn()),
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                          const SizedBox(height: 20),
+                          // Header Section
                           buildHeader(),
                           const SizedBox(height: 40),
                           Form(
@@ -83,11 +64,10 @@ class SignUp extends StatelessWidget {
                                   onChanged: signUpState.validateEmail,
                                 ),
                                 const SizedBox(height: 20),
-                                buildInputField(
+                                buildPasswordField(
                                   controller: passwordController,
                                   hintText: "Password",
                                   icon: Icons.lock_rounded,
-                                  obscureText: true,
                                   errorText: signUpState.passwordError,
                                   onChanged: signUpState.validatePassword,
                                 ),
@@ -122,6 +102,7 @@ class SignUp extends StatelessWidget {
     );
   }
 
+  // Header Widget with Animation
   Widget buildHeader() {
     return TweenAnimationBuilder(
       tween: Tween<double>(begin: 0, end: 1),
@@ -146,7 +127,7 @@ class SignUp extends StatelessWidget {
                   child: CircleAvatar(
                     radius: 50,
                     backgroundColor: Colors.white,
-                    backgroundImage: const AssetImage('assets/avatar.png.png'),
+                    backgroundImage: const AssetImage('assets/avatar.png.png'), // Make sure the image exists
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -174,6 +155,7 @@ class SignUp extends StatelessWidget {
     );
   }
 
+  // Input Field Widget
   Widget buildInputField({
     required TextEditingController controller,
     required String hintText,
@@ -236,6 +218,80 @@ class SignUp extends StatelessWidget {
     );
   }
 
+  // Password Field Widget
+  Widget buildPasswordField({
+    required TextEditingController controller,
+    required String hintText,
+    required IconData icon,
+    String? errorText,
+    required Function(String) onChanged,
+  }) {
+    return TweenAnimationBuilder(
+      tween: Tween<double>(begin: 0, end: 1),
+      duration: const Duration(milliseconds: 1200),
+      builder: (context, double value, child) {
+        return Transform.translate(
+          offset: Offset(0, 50 * (1 - value)),
+          child: Opacity(
+            opacity: value,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(15),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 10,
+                    offset: const Offset(0, 5),
+                  ),
+                ],
+              ),
+              child: TextFormField(
+                controller: controller,
+                obscureText: !isPasswordVisible,
+                onChanged: onChanged,
+                style: GoogleFonts.poppins(
+                  fontSize: 16,
+                  color: Colors.black87,
+                ),
+                decoration: InputDecoration(
+                  prefixIcon: Icon(
+                    icon,
+                    color: Colors.deepOrange.shade400,
+                  ),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      isPasswordVisible
+                          ? Icons.visibility
+                          : Icons.visibility_off,
+                      color: Colors.deepOrange.shade400,
+                    ),
+                    onPressed: () {
+                      isPasswordVisible = !isPasswordVisible;
+                    },
+                  ),
+                  hintText: hintText,
+                  errorText: errorText,
+                  hintStyle: GoogleFonts.poppins(
+                    color: Colors.grey.shade400,
+                    fontSize: 16,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    borderSide: BorderSide.none,
+                  ),
+                  filled: true,
+                  fillColor: Colors.white,
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // SignUp Button
   Widget buildSignUpButton(BuildContext context, SignUpState signUpState) {
     return TweenAnimationBuilder(
       tween: Tween<double>(begin: 0, end: 1),
@@ -293,8 +349,7 @@ class SignUp extends StatelessWidget {
       },
     );
   }
-
-  Widget buildGoogleSignUp(BuildContext context, SignUpState signUpState) {
+ Widget buildGoogleSignUp(BuildContext context, SignUpState signUpState) {
     return TweenAnimationBuilder(
       tween: Tween<double>(begin: 0, end: 1),
       duration: const Duration(milliseconds: 2000),
@@ -341,62 +396,48 @@ class SignUp extends StatelessWidget {
     );
   }
 
+  // Login Link Widget
   Widget buildLoginLink(BuildContext context) {
     return TweenAnimationBuilder(
       tween: Tween<double>(begin: 0, end: 1),
       duration: const Duration(milliseconds: 2200),
       builder: (context, double value, child) {
-        return Opacity(
-          opacity: value,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                "Already have an account? ",
-                style: GoogleFonts.poppins(
-                  color: Colors.grey.shade600,
-                  fontSize: 16,
-                ),
-              ),
-              GestureDetector(
-                onTap: () => Navigator.pushReplacement(
+        return Transform.translate(
+          offset: Offset(0, 20 * (1 - value)),
+          child: Opacity(
+            opacity: value,
+            child: GestureDetector(
+              onTap: () {
+                Navigator.pushReplacement(
                   context,
-                  CustomPageRoute(child: LogIn()),
-                ),
-                child: Text(
-                  "Login",
-                  style: GoogleFonts.poppins(
-                    color: Colors.deepOrange.shade400,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+                  MaterialPageRoute(
+                    builder: (context) => const LogIn(),
                   ),
+                );
+              },
+              child: RichText(
+                textAlign: TextAlign.center,
+                text: TextSpan(
+                  style: GoogleFonts.poppins(
+                    color: Colors.black,
+                    fontSize: 16,
+                  ),
+                  children: [
+                    const TextSpan(text: "Already have an account? "),
+                    TextSpan(
+                      text: "Login",
+                      style: TextStyle(
+                        color: Colors.deepOrange.shade400,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
+            ),
           ),
         );
       },
     );
   }
-}
-
-class CustomPageRoute extends PageRouteBuilder {
-  final Widget child;
-
-  CustomPageRoute({required this.child})
-      : super(
-          pageBuilder: (context, animation, secondaryAnimation) => child,
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            const begin = Offset(1.0, 0.0);
-            const end = Offset.zero;
-            const curve = Curves.easeInOut;
-            var tween =
-                Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-            var offsetAnimation = animation.drive(tween);
-            return SlideTransition(
-              position: offsetAnimation,
-              child: child,
-            );
-          },
-        );
 }

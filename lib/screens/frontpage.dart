@@ -1,6 +1,9 @@
 // todo_list_intro_screen.dart
+// ignore_for_file: prefer_const_constructors
+
 import 'package:authenticationapp/providers/frontpage_provider';
-import 'package:authenticationapp/screens/signup.dart';
+import 'package:authenticationapp/routes/forgetpasswordcustom.dart' as forgetpasswordcustom;
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -258,7 +261,7 @@ class ToDoListIntro extends StatelessWidget {
               ),
               onPressed: () {
                 Navigator.of(context).push(
-                  CustomPageRoute(child: LogIn()),
+                  forgetpasswordcustom.CustomPageRoute(child: LogIn()),
                 );
               },
               style: ElevatedButton.styleFrom(

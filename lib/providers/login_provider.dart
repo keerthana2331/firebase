@@ -1,8 +1,7 @@
 // First, let's create the login state provider
 
 import 'package:authenticationapp/screens/homepage.dart';
-import 'package:authenticationapp/screens/frontpage.dart' as front_page;
-import 'package:authenticationapp/screens/signup.dart';
+
 import 'package:flutter/material.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -11,11 +10,21 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:email_validator/email_validator.dart';
 
 
-class LoginState extends ChangeNotifier {
+class LoginState with ChangeNotifier {
   bool isLoading = false;
   String? emailError;
   String? passwordError;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
+
+  // Password visibility toggle
+  bool _isPasswordVisible = false;
+
+  bool get isPasswordVisible => _isPasswordVisible;
+
+  void togglePasswordVisibility() {
+    _isPasswordVisible = !_isPasswordVisible;
+    notifyListeners();
+  }
 
   void setLoading(bool value) {
     isLoading = value;
@@ -133,7 +142,7 @@ class LoginState extends ChangeNotifier {
         message = "Google sign in failed. Please try again";
         break;
       default:
-        message = "Email that You Provided Is Not Existing";
+        message = "Email or Password that You Provided Is Not Existing";
     }
 
     ScaffoldMessenger.of(context).showSnackBar(
