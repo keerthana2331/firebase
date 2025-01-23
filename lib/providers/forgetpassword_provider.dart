@@ -1,6 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'dart:developer' as developer;
 
 class ForgotPasswordProvider extends ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -20,69 +20,52 @@ class ForgotPasswordProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool> resetPassword(String email) async {
-    email = email.trim().toLowerCase();
-    _setLoading(true);
-    _setErrorMessage(null);
+ Future<bool> resetPassword(String email) async {
+  email = email.trim().toLowerCase();
+  _setLoading(true);
+  _setErrorMessage(null);
 
-    try {
-      // Verbose logging for diagnostics
-      developer.log('Attempting password reset for: $email', 
-        name: 'PasswordResetProvider');
+  try {
+    // Fetch all registered emails
+    QuerySnapshot userQuery = await FirebaseFirestore.instance
+        .collection('users')
+        .where('email', isEqualTo: email)
+        .get();
 
-      List<String> signInMethods = await _auth.fetchSignInMethodsForEmail(email);
-
-      // Detailed sign-in method logging
-      developer.log('Sign-in methods for $email: $signInMethods', 
-        name: 'PasswordResetProvider');
-
-      if (signInMethods.isEmpty) {
-        _setErrorMessage("No account found");
-        _setLoading(false);
-        return false;
-      }
-
-      await _auth.sendPasswordResetEmail(email: email);
-      
-      developer.log('Password reset email sent successfully', 
-        name: 'PasswordResetProvider');
-
-      _setLoading(false);
-      return true;
-    } on FirebaseAuthException catch (e) {
-      // Comprehensive error logging
-      developer.log('FirebaseAuthException: ${e.code} - ${e.message}', 
-        name: 'PasswordResetProvider', 
-        error: e);
-
-      String errorMessage = _getErrorMessage(e.code);
-      _setErrorMessage(errorMessage);
-      _setLoading(false);
-      return false;
-    } catch (e) {
-      // General error logging
-      developer.log('Unexpected error during reset', 
-        name: 'PasswordResetProvider', 
-        error: e);
-
-      _setErrorMessage("Unexpected error");
+    // Check if user exists in database
+    if (userQuery.docs.isEmpty) {
+      _setErrorMessage("This email is not registered");
       _setLoading(false);
       return false;
     }
-  }
 
-  String _getErrorMessage(String code) {
-    switch (code) {
+    // Send password reset email
+    await _auth.sendPasswordResetEmail(email: email);
+    print('Password reset email sent'); // Added print statement
+    _setLoading(false);
+    return true;
+  } on FirebaseAuthException catch (e) {
+    String errorMessage = "";
+    switch (e.code) {
       case "invalid-email":
-        return "Invalid email address";
+        errorMessage = "Invalid email address";
+        break;
       case "user-not-found":
-        return "No user found";
+        errorMessage = "No account found with this email";
+        break;
       case "too-many-requests":
-        return "Too many reset attempts";
-      case "network-request-failed":
-        return "Network error. Check connection";
+        errorMessage = "Too many reset attempts. Try later";
+        break;
       default:
-        return "Reset failed: $code";
+        errorMessage = "Reset failed: ${e.code}";
     }
+    _setErrorMessage(errorMessage);
+    _setLoading(false);
+    return false;
+  } catch (e) {
+    _setErrorMessage("Unexpected error");
+    _setLoading(false);
+    return false;
   }
+}
 }
