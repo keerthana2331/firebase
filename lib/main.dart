@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors
+// ignore_for_file: prefer_const_constructors, prefer_typing_uninitialized_variables
 
 import 'package:authenticationapp/providers/forgetpassword_provider.dart';
 import 'package:authenticationapp/providers/homescreenprovider.dart';
@@ -7,12 +7,10 @@ import 'package:authenticationapp/screens/frontpage.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
- // Import DefaultFirebaseOptions correctly
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
-  // Initialize Firebase with options
+
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -20,7 +18,7 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => NotesProvider()), // Ensure NotesProvider is defined
+        ChangeNotifierProvider(create: (_) => NotesProvider()),
         ChangeNotifierProvider(create: (_) => ForgotPasswordProvider()),
       ],
       child: const MyApp(),
@@ -44,7 +42,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: ToDoListIntro(), // Assuming FrontPage is your intended home widget
+      home: ToDoListIntro(),
     );
   }
 }

@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously, prefer_const_constructors
+
 import 'package:authenticationapp/screens/homepage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -6,26 +8,23 @@ import 'package:google_sign_in/google_sign_in.dart';
 
 class SignUpState extends ChangeNotifier {
   bool _isLoading = false;
-  bool _isPasswordVisible = false; // This field controls the password visibility
+  bool _isPasswordVisible = false;
   String? _nameError;
   String? _emailError;
   String? _passwordError;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
 
-  // Getters
   bool get isLoading => _isLoading;
-  bool get isPasswordVisible => _isPasswordVisible; // Getter for password visibility
+  bool get isPasswordVisible => _isPasswordVisible;
   String? get nameError => _nameError;
   String? get emailError => _emailError;
   String? get passwordError => _passwordError;
 
-  // Toggle password visibility
   void togglePasswordVisibility() {
     _isPasswordVisible = !_isPasswordVisible;
     notifyListeners();
   }
 
-  // Validate name
   void validateName(String value) {
     if (value.isEmpty) {
       _nameError = 'Please enter your name';
@@ -37,7 +36,6 @@ class SignUpState extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Validate email
   void validateEmail(String value) {
     final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
     if (value.isEmpty) {
@@ -50,7 +48,6 @@ class SignUpState extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Validate password
   void validatePassword(String value) {
     final passwordRegex = RegExp(
         r'^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]+$');
@@ -67,7 +64,6 @@ class SignUpState extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Sign up with email and password
   Future<void> signUpUser(
       String name, String email, String password, BuildContext context) async {
     if (_emailError != null || _passwordError != null || _nameError != null) {
@@ -78,14 +74,12 @@ class SignUpState extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // Create user with email and password
       UserCredential userCredential =
           await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
 
-      // Save user data to Firestore
       await FirebaseFirestore.instance
           .collection('users')
           .doc(userCredential.user!.uid)
@@ -105,7 +99,6 @@ class SignUpState extends ChangeNotifier {
         ),
       );
 
-      // Navigate to home page
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => Home()),
@@ -143,17 +136,14 @@ class SignUpState extends ChangeNotifier {
     }
   }
 
-  // Sign up with Google
   Future<void> signUpWithGoogle(BuildContext context) async {
     _isLoading = true;
     notifyListeners();
 
     try {
-      // Sign out any existing user
       await FirebaseAuth.instance.signOut();
       await _googleSignIn.signOut();
 
-      // Begin Google sign-in process
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
 
       if (googleUser != null) {
@@ -164,17 +154,14 @@ class SignUpState extends ChangeNotifier {
           idToken: googleAuth.idToken,
         );
 
-        // Sign in to Firebase with Google credential
         final UserCredential userCredential =
             await FirebaseAuth.instance.signInWithCredential(credential);
 
-        // Check if the user already exists in Firestore
         final userDoc = await FirebaseFirestore.instance
             .collection('users')
             .doc(userCredential.user!.uid)
             .get();
 
-        // If the user doesn't exist, create a new record
         if (!userDoc.exists) {
           await FirebaseFirestore.instance
               .collection('users')
@@ -187,7 +174,6 @@ class SignUpState extends ChangeNotifier {
           });
         }
 
-        // Navigate to the Home screen
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => Home()),
@@ -219,7 +205,6 @@ class SignUpState extends ChangeNotifier {
     }
   }
 
-  // Reset all errors
   void resetErrors() {
     _nameError = null;
     _emailError = null;

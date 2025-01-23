@@ -1,15 +1,14 @@
-// todo_list_intro_screen.dart
-// ignore_for_file: prefer_const_constructors
+// ignore_for_file: prefer_const_constructors, deprecated_member_use
 
 import 'package:authenticationapp/providers/frontpage_provider';
-import 'package:authenticationapp/routes/forgetpasswordcustom.dart' as forgetpasswordcustom;
+import 'package:authenticationapp/routes/forgetpasswordcustom.dart'
+    as forgetpasswordcustom;
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 import 'loginpage.dart';
-
 
 class ToDoListIntro extends StatelessWidget {
   const ToDoListIntro({super.key});
@@ -34,13 +33,13 @@ class ToDoListIntro extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    _buildAnimatedLogo(provider),
+                    buildAnimatedLogo(provider),
                     const SizedBox(height: 40.0),
-                    _buildAnimatedTitle(provider),
+                    buildAnimatedTitle(provider),
                     const SizedBox(height: 15.0),
-                    _buildFirebaseLabel(provider),
+                    buildFirebaseLabel(provider),
                     const SizedBox(height: 60.0),
-                    _buildStartButton(context, provider),
+                    buildStartButton(context, provider),
                   ],
                 ),
               ),
@@ -51,7 +50,7 @@ class ToDoListIntro extends StatelessWidget {
     );
   }
 
-  Widget _buildAnimatedLogo(ToDoListIntroProvider provider) {
+  Widget buildAnimatedLogo(ToDoListIntroProvider provider) {
     return TweenAnimationBuilder(
       tween: Tween<double>(begin: 0, end: 1),
       duration: provider.logoAnimationDuration,
@@ -60,33 +59,33 @@ class ToDoListIntro extends StatelessWidget {
           offset: Offset(0, provider.getLogoTranslation(value)),
           child: Transform.scale(
             scale: value,
-            child: _buildLogoStack(provider),
+            child: buildLogoStack(provider),
           ),
         );
       },
     );
   }
 
-  Widget _buildLogoStack(ToDoListIntroProvider provider) {
+  Widget buildLogoStack(ToDoListIntroProvider provider) {
     return Stack(
       alignment: Alignment.center,
       children: [
-        _buildRotatedContainer(
+        buildRotatedContainer(
           offset: const Offset(-15, -15),
           angle: -0.2,
           color: provider.getLogoBackgroundColor1(),
         ),
-        _buildRotatedContainer(
+        buildRotatedContainer(
           offset: const Offset(15, -10),
           angle: 0.2,
           color: provider.getLogoBackgroundColor2(),
         ),
-        _buildMainContainer(),
+        buildMainContainer(),
       ],
     );
   }
 
-  Widget _buildRotatedContainer({
+  Widget buildRotatedContainer({
     required Offset offset,
     required double angle,
     required Color color,
@@ -114,7 +113,7 @@ class ToDoListIntro extends StatelessWidget {
     );
   }
 
-  Widget _buildMainContainer() {
+  Widget buildMainContainer() {
     return Container(
       height: 120,
       width: 120,
@@ -144,7 +143,7 @@ class ToDoListIntro extends StatelessWidget {
     );
   }
 
-  Widget _buildAnimatedTitle(ToDoListIntroProvider provider) {
+  Widget buildAnimatedTitle(ToDoListIntroProvider provider) {
     return TweenAnimationBuilder(
       tween: Tween<double>(begin: 0, end: 1),
       duration: provider.titleAnimationDuration,
@@ -164,22 +163,19 @@ class ToDoListIntro extends StatelessWidget {
                 letterSpacing: 3.0,
               ),
             ),
-            
           ),
         );
       },
     );
   }
-  
 
-  Widget _buildFirebaseLabel(ToDoListIntroProvider provider) {
+  Widget buildFirebaseLabel(ToDoListIntroProvider provider) {
     return TweenAnimationBuilder(
       tween: Tween<double>(begin: 0, end: 1),
       duration: provider.firebaseAnimationDuration,
       builder: (context, double value, child) {
         return Opacity(
           opacity: value,
-          
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             decoration: BoxDecoration(
@@ -221,8 +217,9 @@ class ToDoListIntro extends StatelessWidget {
       },
     );
   }
- 
-  Widget _buildStartButton(BuildContext context, ToDoListIntroProvider provider) {
+
+  Widget buildStartButton(
+      BuildContext context, ToDoListIntroProvider provider) {
     return TweenAnimationBuilder(
       tween: Tween<double>(begin: 0, end: 1),
       duration: provider.buttonAnimationDuration,

@@ -1,7 +1,7 @@
+// ignore_for_file: no_leading_underscores_for_local_identifiers, deprecated_member_use, prefer_const_constructors
+
 import 'package:authenticationapp/providers/login_provider.dart';
 import 'package:authenticationapp/routes/frontpagecustom.dart' as front_page;
-
-
 
 import 'package:authenticationapp/screens/signup.dart';
 import 'package:flutter/material.dart';
@@ -41,39 +41,40 @@ class LogIn extends StatelessWidget {
                 ),
                 child: SafeArea(
                   child: SingleChildScrollView(
-                    child: Padding(
-  padding: const EdgeInsets.symmetric(horizontal: 50.0, vertical: 122.0),
-  child: Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    mainAxisSize: MainAxisSize.max,
-    children: [
-      buildBackButton(context),
-      const SizedBox(height: 20),
-      Center(child: buildWelcomeText()),
-      const SizedBox(height: 30),
-      Form(
-        key: _formKey,
-        child: Column(
-          children: [
-            buildEmailField(mailController, loginState),
-            const SizedBox(height: 15),
-            buildPasswordField(passwordController, loginState),
-            const SizedBox(height: 25),
-            buildLoginButton(context, loginState, mailController, passwordController),
-            const SizedBox(height: 20),
-            buildForgotPasswordButton(context),
-            const SizedBox(height: 30),
-            buildGoogleSignIn(context, loginState),
-            const SizedBox(height: 25),
-            buildSignUpSection(context),
-          ],
-        ),
-      ),
-    ],
-  ),
-)
-
-                  ),
+                      child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 50.0, vertical: 122.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        buildBackButton(context),
+                        const SizedBox(height: 20),
+                        Center(child: buildWelcomeText()),
+                        const SizedBox(height: 30),
+                        Form(
+                          key: _formKey,
+                          child: Column(
+                            children: [
+                              buildEmailField(mailController, loginState),
+                              const SizedBox(height: 15),
+                              buildPasswordField(
+                                  passwordController, loginState),
+                              const SizedBox(height: 25),
+                              buildLoginButton(context, loginState,
+                                  mailController, passwordController),
+                              const SizedBox(height: 20),
+                              buildForgotPasswordButton(context),
+                              const SizedBox(height: 30),
+                              buildGoogleSignIn(context, loginState),
+                              const SizedBox(height: 25),
+                              buildSignUpSection(context),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  )),
                 ),
               ),
               if (loginState.isLoading)
@@ -116,15 +117,18 @@ class LogIn extends StatelessWidget {
     );
   }
 
-  Widget buildEmailField(TextEditingController mailController, LoginState loginState) {
+  Widget buildEmailField(
+      TextEditingController mailController, LoginState loginState) {
     return TextFormField(
       controller: mailController,
       style: GoogleFonts.poppins(fontSize: 16, color: Colors.black87),
       decoration: InputDecoration(
-        prefixIcon: Icon(Icons.email_rounded, color: Colors.deepOrange.shade400),
+        prefixIcon:
+            Icon(Icons.email_rounded, color: Colors.deepOrange.shade400),
         hintText: "Email",
         errorText: loginState.emailError,
-        hintStyle: GoogleFonts.poppins(color: Colors.grey.shade400, fontSize: 16),
+        hintStyle:
+            GoogleFonts.poppins(color: Colors.grey.shade400, fontSize: 16),
         filled: true,
         fillColor: Colors.white,
         border: OutlineInputBorder(
@@ -144,44 +148,51 @@ class LogIn extends StatelessWidget {
     );
   }
 
-  Widget buildPasswordField(TextEditingController passwordController, LoginState loginState) {
-  return TextFormField(
-    controller: passwordController,
-    obscureText: !loginState.isPasswordVisible,
-    style: GoogleFonts.poppins(fontSize: 16, color: Colors.black87),
-    decoration: InputDecoration(
-      prefixIcon: Icon(Icons.lock_rounded, color: Colors.deepOrange.shade400),
-      hintText: "Password",
-      errorText: loginState.passwordError,
-      hintStyle: GoogleFonts.poppins(color: Colors.grey.shade400, fontSize: 16),
-      filled: true,
-      fillColor: Colors.white,
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(15),
-        borderSide: BorderSide.none,
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(15),
-        borderSide: BorderSide.none,
-      ),
-      errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(15),
-        borderSide: BorderSide(color: Colors.red.shade400),
-      ),
-      suffixIcon: IconButton(
-        icon: Icon(
-          loginState.isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-          color: Colors.deepOrange.shade400,
+  Widget buildPasswordField(
+      TextEditingController passwordController, LoginState loginState) {
+    return TextFormField(
+      controller: passwordController,
+      obscureText: !loginState.isPasswordVisible,
+      style: GoogleFonts.poppins(fontSize: 16, color: Colors.black87),
+      decoration: InputDecoration(
+        prefixIcon: Icon(Icons.lock_rounded, color: Colors.deepOrange.shade400),
+        hintText: "Password",
+        errorText: loginState.passwordError,
+        hintStyle:
+            GoogleFonts.poppins(color: Colors.grey.shade400, fontSize: 16),
+        filled: true,
+        fillColor: Colors.white,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: BorderSide.none,
         ),
-        onPressed: () => loginState.togglePasswordVisibility(),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: BorderSide.none,
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: BorderSide(color: Colors.red.shade400),
+        ),
+        suffixIcon: IconButton(
+          icon: Icon(
+            loginState.isPasswordVisible
+                ? Icons.visibility
+                : Icons.visibility_off,
+            color: Colors.deepOrange.shade400,
+          ),
+          onPressed: () => loginState.togglePasswordVisibility(),
+        ),
       ),
-    ),
-    onChanged: (value) => loginState.validatePassword(value),
-  );
-}
+      onChanged: (value) => loginState.validatePassword(value),
+    );
+  }
 
-
-  Widget buildLoginButton(BuildContext context, LoginState loginState, TextEditingController mailController, TextEditingController passwordController) {
+  Widget buildLoginButton(
+      BuildContext context,
+      LoginState loginState,
+      TextEditingController mailController,
+      TextEditingController passwordController) {
     return Container(
       width: double.infinity,
       height: 55,

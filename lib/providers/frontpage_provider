@@ -1,20 +1,19 @@
-// todo_list_intro_provider.dart
+
 import 'dart:math';
 import 'package:flutter/material.dart';
 
 class ToDoListIntroProvider extends ChangeNotifier {
-  // Animation duration constants
+
   final logoAnimationDuration = const Duration(milliseconds: 800);
   final titleAnimationDuration = const Duration(milliseconds: 1000);
   final firebaseAnimationDuration = const Duration(milliseconds: 1200);
   final buttonAnimationDuration = const Duration(milliseconds: 1400);
 
-  // Helper methods for animations
   double getLogoTranslation(double value) => 20 * (1 - value);
   double getTitleScale(double value) => 1 + (0.1 * (1 - cos(value * 3.14)));
   double getButtonTranslation(double value) => 10 * (1 - value);
 
-  // Gradient colors
+  
   List<Color> getBackgroundGradient() => [
         Colors.yellow.shade100,
         Colors.orange.shade100,

@@ -1,8 +1,10 @@
+// ignore_for_file: must_be_immutable, deprecated_member_use, prefer_const_constructors
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:authenticationapp/screens/loginpage.dart';
-import 'package:authenticationapp/providers/signup_provider.dart'; // Ensure this file exists
+import 'package:authenticationapp/providers/signup_provider.dart';
 
 class SignUp extends StatelessWidget {
   SignUp({super.key});
@@ -11,7 +13,7 @@ class SignUp extends StatelessWidget {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController nameController = TextEditingController();
-  bool isPasswordVisible = false; // Track password visibility
+  bool isPasswordVisible = false;
 
   @override
   Widget build(BuildContext context) {
@@ -37,11 +39,11 @@ class SignUp extends StatelessWidget {
                 child: SafeArea(
                   child: SingleChildScrollView(
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 85.0),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 30.0, vertical: 85.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Header Section
                           buildHeader(),
                           const SizedBox(height: 40),
                           Form(
@@ -102,7 +104,6 @@ class SignUp extends StatelessWidget {
     );
   }
 
-  // Header Widget with Animation
   Widget buildHeader() {
     return TweenAnimationBuilder(
       tween: Tween<double>(begin: 0, end: 1),
@@ -127,7 +128,7 @@ class SignUp extends StatelessWidget {
                   child: CircleAvatar(
                     radius: 50,
                     backgroundColor: Colors.white,
-                    backgroundImage: const AssetImage('assets/avatar.png.png'), // Make sure the image exists
+                    backgroundImage: const AssetImage('assets/avatar.png.png'),
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -155,7 +156,6 @@ class SignUp extends StatelessWidget {
     );
   }
 
-  // Input Field Widget
   Widget buildInputField({
     required TextEditingController controller,
     required String hintText,
@@ -218,7 +218,6 @@ class SignUp extends StatelessWidget {
     );
   }
 
-  // Password Field Widget
   Widget buildPasswordField({
     required TextEditingController controller,
     required String hintText,
@@ -291,7 +290,6 @@ class SignUp extends StatelessWidget {
     );
   }
 
-  // SignUp Button
   Widget buildSignUpButton(BuildContext context, SignUpState signUpState) {
     return TweenAnimationBuilder(
       tween: Tween<double>(begin: 0, end: 1),
@@ -349,7 +347,8 @@ class SignUp extends StatelessWidget {
       },
     );
   }
- Widget buildGoogleSignUp(BuildContext context, SignUpState signUpState) {
+
+  Widget buildGoogleSignUp(BuildContext context, SignUpState signUpState) {
     return TweenAnimationBuilder(
       tween: Tween<double>(begin: 0, end: 1),
       duration: const Duration(milliseconds: 2000),
@@ -396,7 +395,6 @@ class SignUp extends StatelessWidget {
     );
   }
 
-  // Login Link Widget
   Widget buildLoginLink(BuildContext context) {
     return TweenAnimationBuilder(
       tween: Tween<double>(begin: 0, end: 1),

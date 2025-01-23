@@ -1,6 +1,8 @@
-// forgot_password_screen.dart
+// ignore_for_file: prefer_const_constructors, deprecated_member_use, use_build_context_synchronously
+
 import 'package:authenticationapp/providers/forgetpassword_provider.dart';
-import 'package:authenticationapp/routes/forgetpasswordcustom.dart' as custom_route;
+import 'package:authenticationapp/routes/forgetpasswordcustom.dart'
+    as custom_route;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -77,13 +79,13 @@ class ForgotPassword extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const SizedBox(height: 10),
-                          _buildBackButton(context),
+                          buildBackButton(context),
                           const SizedBox(height: 20),
-                          _buildHeader(),
+                          buildHeader(),
                           const SizedBox(height: 40),
-                          _buildForm(context, provider),
+                          buildForm(context, provider),
                           const SizedBox(height: 40),
-                          _buildSignUpLink(context),
+                          buildSignUpLink(context),
                           const SizedBox(height: 20),
                         ],
                       ),
@@ -98,7 +100,7 @@ class ForgotPassword extends StatelessWidget {
     );
   }
 
-  Widget _buildBackButton(BuildContext context) {
+  Widget buildBackButton(BuildContext context) {
     return TweenAnimationBuilder(
       tween: Tween<double>(begin: 0, end: 1),
       duration: const Duration(milliseconds: 800),
@@ -120,7 +122,7 @@ class ForgotPassword extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader() {
+  Widget buildHeader() {
     return TweenAnimationBuilder(
       tween: Tween<double>(begin: 0, end: 1),
       duration: const Duration(milliseconds: 1000),
@@ -185,20 +187,20 @@ class ForgotPassword extends StatelessWidget {
     );
   }
 
-  Widget _buildForm(BuildContext context, ForgotPasswordProvider provider) {
+  Widget buildForm(BuildContext context, ForgotPasswordProvider provider) {
     return Form(
       key: _formKey,
       child: Column(
         children: [
-          _buildEmailField(),
+          buildEmailField(),
           const SizedBox(height: 40),
-          _buildSubmitButton(context, provider),
+          buildSubmitButton(context, provider),
         ],
       ),
     );
   }
 
-  Widget _buildEmailField() {
+  Widget buildEmailField() {
     return TweenAnimationBuilder(
       tween: Tween<double>(begin: 0, end: 1),
       duration: const Duration(milliseconds: 1200),
@@ -259,7 +261,8 @@ class ForgotPassword extends StatelessWidget {
     );
   }
 
-  Widget _buildSubmitButton(BuildContext context, ForgotPasswordProvider provider) {
+  Widget buildSubmitButton(
+      BuildContext context, ForgotPasswordProvider provider) {
     return TweenAnimationBuilder(
       tween: Tween<double>(begin: 0, end: 1),
       duration: const Duration(milliseconds: 1400),
@@ -289,7 +292,8 @@ class ForgotPassword extends StatelessWidget {
             child: ElevatedButton(
               onPressed: () async {
                 if (_formKey.currentState!.validate()) {
-                  bool success = await provider.resetPassword(mailController.text);
+                  bool success =
+                      await provider.resetPassword(mailController.text);
                   if (success) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
@@ -338,7 +342,7 @@ class ForgotPassword extends StatelessWidget {
     );
   }
 
-  Widget _buildSignUpLink(BuildContext context) {
+  Widget buildSignUpLink(BuildContext context) {
     return TweenAnimationBuilder(
       tween: Tween<double>(begin: 0, end: 1),
       duration: const Duration(milliseconds: 1600),

@@ -1,4 +1,5 @@
-// notes_provider.dart
+// ignore_for_file: prefer_final_fields, avoid_print
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -18,7 +19,7 @@ class NotesProvider with ChangeNotifier {
 
   Future<void> addNote(String title, String content) async {
     try {
-      final colorIndex = DateTime.now().microsecond % 6; // 6 is the number of colors
+      final colorIndex = DateTime.now().microsecond % 6;
       await FirebaseFirestore.instance.collection('notes').add({
         'title': title,
         'content': content,
@@ -27,7 +28,6 @@ class NotesProvider with ChangeNotifier {
       });
       notifyListeners();
     } catch (e) {
-      // Handle error
       print('Error adding note: $e');
     }
   }
@@ -41,7 +41,6 @@ class NotesProvider with ChangeNotifier {
       });
       notifyListeners();
     } catch (e) {
-      // Handle error
       print('Error updating note: $e');
     }
   }
@@ -51,7 +50,6 @@ class NotesProvider with ChangeNotifier {
       await FirebaseFirestore.instance.collection('notes').doc(id).delete();
       notifyListeners();
     } catch (e) {
-      // Handle error
       print('Error deleting note: $e');
     }
   }

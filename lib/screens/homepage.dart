@@ -1,4 +1,5 @@
-// home.dart
+// ignore_for_file: prefer_const_constructors, use_build_context_synchronously, deprecated_member_use
+
 import 'package:authenticationapp/providers/homescreenprovider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -23,58 +24,60 @@ class Home extends StatelessWidget {
 
   Future<void> signOut(BuildContext context) async {
     bool confirm = await showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        title: Text(
-          'Sign Out',
-          style: GoogleFonts.poppins(
-            fontWeight: FontWeight.bold,
-            color: Colors.deepOrange.shade400,
-          ),
-        ),
-        content: Text(
-          'Are you sure you want to sign out?',
-          style: GoogleFonts.poppins(),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(
-              'Cancel',
+          context: context,
+          builder: (context) => AlertDialog(
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+            title: Text(
+              'Sign Out',
               style: GoogleFonts.poppins(
-                color: Colors.grey.shade600,
+                fontWeight: FontWeight.bold,
+                color: Colors.deepOrange.shade400,
               ),
             ),
-          ),
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Colors.orange.shade400,
-                  Colors.deepOrange.shade400,
-                ],
-              ),
-              borderRadius: BorderRadius.circular(8),
+            content: Text(
+              'Are you sure you want to sign out?',
+              style: GoogleFonts.poppins(),
             ),
-            child: TextButton(
-              onPressed: () => Navigator.pop(context, true),
-              style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                backgroundColor: Colors.transparent,
-              ),
-              child: Text(
-                'Sign Out',
-                style: GoogleFonts.poppins(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: Text(
+                  'Cancel',
+                  style: GoogleFonts.poppins(
+                    color: Colors.grey.shade600,
+                  ),
                 ),
               ),
-            ),
+              Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.orange.shade400,
+                      Colors.deepOrange.shade400,
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: TextButton(
+                  onPressed: () => Navigator.pop(context, true),
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    backgroundColor: Colors.transparent,
+                  ),
+                  child: Text(
+                    'Sign Out',
+                    style: GoogleFonts.poppins(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
-    ) ?? false;
+        ) ??
+        false;
 
     if (confirm) {
       try {
@@ -93,7 +96,8 @@ class Home extends StatelessWidget {
             ),
             backgroundColor: Colors.deepOrange.shade400,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
             margin: const EdgeInsets.all(10),
           ),
         );
@@ -258,7 +262,8 @@ class Home extends StatelessWidget {
                           if (id == null) {
                             await notesProvider.addNote(title!, content!);
                           } else {
-                            await notesProvider.updateNote(id, title!, content!);
+                            await notesProvider.updateNote(
+                                id, title!, content!);
                           }
                           Navigator.pop(context);
                         }
@@ -359,7 +364,8 @@ class Home extends StatelessWidget {
                     child: StreamBuilder<QuerySnapshot>(
                       stream: notesProvider.getNotesStream(),
                       builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
                           return Center(
                             child: CircularProgressIndicator(
                               valueColor: AlwaysStoppedAnimation<Color>(
@@ -393,7 +399,6 @@ class Home extends StatelessWidget {
                                           fontWeight: FontWeight.bold,
                                           color: Colors.deepOrange.shade400,
                                         ),
-                                        
                                       ),
                                       Text(
                                         'Tap + to create your first note',
@@ -573,7 +578,7 @@ class Home extends StatelessWidget {
 
   Future<void> deleteNoteDialog(BuildContext context, String id) async {
     final notesProvider = Provider.of<NotesProvider>(context, listen: false);
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(

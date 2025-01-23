@@ -1,4 +1,4 @@
-// First, let's create the login state provider
+// ignore_for_file: prefer_const_constructors, use_build_context_synchronously
 
 import 'package:authenticationapp/screens/homepage.dart';
 
@@ -9,14 +9,12 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:email_validator/email_validator.dart';
 
-
 class LoginState with ChangeNotifier {
   bool isLoading = false;
   String? emailError;
   String? passwordError;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
 
-  // Password visibility toggle
   bool _isPasswordVisible = false;
 
   bool get isPasswordVisible => _isPasswordVisible;
@@ -72,7 +70,8 @@ class LoginState with ChangeNotifier {
     await _googleSignIn.signOut();
   }
 
-  Future<void> userLogin(BuildContext context, String email, String password) async {
+  Future<void> userLogin(
+      BuildContext context, String email, String password) async {
     if (!validateEmail(email) || !validatePassword(password)) {
       return;
     }
@@ -84,7 +83,8 @@ class LoginState with ChangeNotifier {
         email: email,
         password: password,
       );
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Home()));
+      Navigator.pushReplacement(
+          context, MaterialPageRoute(builder: (context) => Home()));
     } on FirebaseAuthException catch (e) {
       showErrorSnackBar(context, e.code);
     } finally {
@@ -102,14 +102,16 @@ class LoginState with ChangeNotifier {
         return;
       }
 
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
       final AuthCredential credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
       await FirebaseAuth.instance.signInWithCredential(credential);
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Home()));
+      Navigator.pushReplacement(
+          context, MaterialPageRoute(builder: (context) => Home()));
     } catch (e) {
       showErrorSnackBar(context, "google-sign-in-failed");
     } finally {
