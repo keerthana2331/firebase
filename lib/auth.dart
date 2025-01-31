@@ -1,7 +1,6 @@
-// ignore_for_file: unreachable_switch_default, await_only_futures, prefer_const_constructors, use_build_context_synchronously, non_constant_identifier_names, use_rethrow_when_possible
-
-import 'package:authenticationapp/database.dart';
-import 'package:authenticationapp/screens/homepage.dart';
+// ignore_for_file: unreachable_switch_default, await_only_futures, prefer_const_constructors, use_build_context_synchronously, non_constant_identifier_names, use_rethrow_when_possible;
+import 'package:authenticationapp/models/database.dart';
+import 'package:authenticationapp/screens/homepage.dart' as app;
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -45,7 +44,7 @@ class AuthMethods {
           .addUser(userDetails.uid, userInfoMap)
           .then((value) {
         Navigator.push(
-            context, MaterialPageRoute(builder: (context) => Home()));
+            context, MaterialPageRoute(builder: (context) => app.Home()));
       });
     }
   }

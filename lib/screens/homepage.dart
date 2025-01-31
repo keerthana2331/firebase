@@ -1,301 +1,301 @@
-// ignore_for_file: prefer_const_constructors, use_build_context_synchronously, deprecated_member_use
+  // ignore_for_file: prefer_const_constructors, use_build_context_synchronously, deprecated_member_use
 
-import 'package:authenticationapp/providers/homescreenprovider.dart';
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
+  import 'package:authenticationapp/providers/homescreenprovider.dart';
+  import 'package:flutter/material.dart';
+  import 'package:provider/provider.dart';
+  import 'package:firebase_auth/firebase_auth.dart';
+  import 'package:cloud_firestore/cloud_firestore.dart';
+  import 'package:google_fonts/google_fonts.dart';
+  import 'package:intl/intl.dart';
 
-import 'package:authenticationapp/screens/loginpage.dart';
+  import 'package:authenticationapp/screens/loginpage.dart';
 
-class Home extends StatelessWidget {
-  const Home({super.key});
+  class Home extends StatelessWidget {
+    const Home({super.key});
 
-  static const List<Color> noteColors = [
-    Color(0xFFffab91),
-    Color(0xFFfff59d),
-    Color(0xFFb2dfdb),
-    Color(0xFFe1bee7),
-    Color(0xFFbbdefb),
-    Color(0xFFf8bbd0),
-  ];
+    static const List<Color> noteColors = [
+      Color(0xFFffab91),
+      Color(0xFFfff59d),
+      Color(0xFFb2dfdb),
+      Color(0xFFe1bee7),
+      Color(0xFFbbdefb),
+      Color(0xFFf8bbd0),
+    ];
 
-  Future<void> signOut(BuildContext context) async {
-    bool confirm = await showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-            title: Text(
-              'Sign Out',
-              style: GoogleFonts.poppins(
-                fontWeight: FontWeight.bold,
-                color: Colors.deepOrange.shade400,
-              ),
-            ),
-            content: Text(
-              'Are you sure you want to sign out?',
-              style: GoogleFonts.poppins(),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: Text(
-                  'Cancel',
-                  style: GoogleFonts.poppins(
-                    color: Colors.grey.shade600,
-                  ),
+    Future<void> signOut(BuildContext context) async {
+      bool confirm = await showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              shape:
+                  RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+              title: Text(
+                'Sign Out',
+                style: GoogleFonts.poppins(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.deepOrange.shade400,
                 ),
               ),
-              Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Colors.orange.shade400,
-                      Colors.deepOrange.shade400,
-                    ],
-                  ),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: TextButton(
-                  onPressed: () => Navigator.pop(context, true),
-                  style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    backgroundColor: Colors.transparent,
-                  ),
+              content: Text(
+                'Are you sure you want to sign out?',
+                style: GoogleFonts.poppins(),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
                   child: Text(
-                    'Sign Out',
+                    'Cancel',
                     style: GoogleFonts.poppins(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
+                      color: Colors.grey.shade600,
                     ),
                   ),
                 ),
-              ),
-            ],
-          ),
-        ) ??
-        false;
-
-    if (confirm) {
-      try {
-        await FirebaseAuth.instance.signOut();
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => LogIn()),
-          (Route<dynamic> route) => false,
-        );
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Error signing out. Please try again.',
-              style: GoogleFonts.poppins(color: Colors.white),
-            ),
-            backgroundColor: Colors.deepOrange.shade400,
-            behavior: SnackBarBehavior.floating,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-            margin: const EdgeInsets.all(10),
-          ),
-        );
-      }
-    }
-  }
-
-  Future<void> addOrUpdateNote(BuildContext context,
-      {String? id, String? currentTitle, String? currentContent}) async {
-    final notesProvider = Provider.of<NotesProvider>(context, listen: false);
-    String? title = currentTitle;
-    String? content = currentContent;
-    final titleController = TextEditingController(text: currentTitle);
-    final contentController = TextEditingController(text: currentContent);
-
-    await showDialog(
-      context: context,
-      builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        child: Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Colors.yellow.shade50,
-                Colors.orange.shade50,
-                Colors.deepOrange.shade50,
-              ],
-              stops: const [0.0, 0.5, 1.0],
-            ),
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 10,
-                spreadRadius: 2,
-              ),
-            ],
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ShaderMask(
-                shaderCallback: (bounds) => LinearGradient(
-                  colors: [
-                    Colors.orange.shade700,
-                    Colors.deepOrange.shade900,
-                  ],
-                ).createShader(bounds),
-                child: Text(
-                  id == null ? 'New Note' : 'Edit Note',
-                  style: GoogleFonts.poppins(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(15),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 10,
-                      offset: const Offset(0, 5),
-                    ),
-                  ],
-                ),
-                child: TextField(
-                  controller: titleController,
-                  decoration: InputDecoration(
-                    hintText: 'Title',
-                    hintStyle: GoogleFonts.poppins(
-                      color: Colors.grey.shade400,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(15),
-                      borderSide: BorderSide.none,
-                    ),
-                    filled: true,
-                    fillColor: Colors.white,
-                    contentPadding: const EdgeInsets.all(15),
-                  ),
-                  style: GoogleFonts.poppins(),
-                  onChanged: (value) => title = value,
-                ),
-              ),
-              const SizedBox(height: 15),
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(15),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 10,
-                      offset: const Offset(0, 5),
-                    ),
-                  ],
-                ),
-                child: TextField(
-                  controller: contentController,
-                  maxLines: 5,
-                  decoration: InputDecoration(
-                    hintText: 'Write your note here...',
-                    hintStyle: GoogleFonts.poppins(
-                      color: Colors.grey.shade400,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(15),
-                      borderSide: BorderSide.none,
-                    ),
-                    filled: true,
-                    fillColor: Colors.white,
-                    contentPadding: const EdgeInsets.all(15),
-                  ),
-                  style: GoogleFonts.poppins(),
-                  onChanged: (value) => content = value,
-                ),
-              ),
-              const SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: Text(
-                      'Cancel',
-                      style: GoogleFonts.poppins(
-                        color: Colors.grey.shade600,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          Colors.orange.shade400,
-                          Colors.deepOrange.shade400,
-                        ],
-                      ),
-                      borderRadius: BorderRadius.circular(15),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.orange.withOpacity(0.3),
-                          spreadRadius: 1,
-                          blurRadius: 8,
-                          offset: const Offset(0, 4),
-                        ),
+                Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.orange.shade400,
+                        Colors.deepOrange.shade400,
                       ],
                     ),
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        if (title?.isNotEmpty == true &&
-                            content?.isNotEmpty == true) {
-                          if (id == null) {
-                            await notesProvider.addNote(title!, content!);
-                          } else {
-                            await notesProvider.updateNote(
-                                id, title!, content!);
-                          }
-                          Navigator.pop(context);
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.transparent,
-                        shadowColor: Colors.transparent,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 20, vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                      ),
-                      child: Text(
-                        id == null ? 'Add Note' : 'Save Changes',
-                        style: GoogleFonts.poppins(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                        ),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: TextButton(
+                    onPressed: () => Navigator.pop(context, true),
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      backgroundColor: Colors.transparent,
+                    ),
+                    child: Text(
+                      'Sign Out',
+                      style: GoogleFonts.poppins(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
-                ],
+                ),
+              ],
+            ),
+          ) ??
+          false;
+
+      if (confirm) {
+        try {
+          await FirebaseAuth.instance.signOut();
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => LogIn()),
+            (Route<dynamic> route) => false,
+          );
+        } catch (e) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Error signing out. Please try again.',
+                style: GoogleFonts.poppins(color: Colors.white),
               ),
-            ],
+              backgroundColor: Colors.deepOrange.shade400,
+              behavior: SnackBarBehavior.floating,
+              shape:
+                  RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+              margin: const EdgeInsets.all(10),
+            ),
+          );
+        }
+      }
+    }
+
+    Future<void> addOrUpdateNote(BuildContext context,
+        {String? id, String? currentTitle, String? currentContent}) async {
+      final notesProvider = Provider.of<NotesProvider>(context, listen: false);
+      String? title = currentTitle;
+      String? content = currentContent;
+      final titleController = TextEditingController(text: currentTitle);
+      final contentController = TextEditingController(text: currentContent);
+
+      await showDialog(
+        context: context,
+        builder: (context) => Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Colors.yellow.shade50,
+                  Colors.orange.shade50,
+                  Colors.deepOrange.shade50,
+                ],
+                stops: const [0.0, 0.5, 1.0],
+              ),
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 10,
+                  spreadRadius: 2,
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ShaderMask(
+                  shaderCallback: (bounds) => LinearGradient(
+                    colors: [
+                      Colors.orange.shade700,
+                      Colors.deepOrange.shade900,
+                    ],
+                  ).createShader(bounds),
+                  child: Text(
+                    id == null ? 'New Note' : 'Edit Note',
+                    style: GoogleFonts.poppins(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(15),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 10,
+                        offset: const Offset(0, 5),
+                      ),
+                    ],
+                  ),
+                  child: TextField(
+                    controller: titleController,
+                    decoration: InputDecoration(
+                      hintText: 'Title',
+                      hintStyle: GoogleFonts.poppins(
+                        color: Colors.grey.shade400,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15),
+                        borderSide: BorderSide.none,
+                      ),
+                      filled: true,
+                      fillColor: Colors.white,
+                      contentPadding: const EdgeInsets.all(15),
+                    ),
+                    style: GoogleFonts.poppins(),
+                    onChanged: (value) => title = value,
+                  ),
+                ),
+                const SizedBox(height: 15),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(15),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 10,
+                        offset: const Offset(0, 5),
+                      ),
+                    ],
+                  ),
+                  child: TextField(
+                    controller: contentController,
+                    maxLines: 5,
+                    decoration: InputDecoration(
+                      hintText: 'Write your note here...',
+                      hintStyle: GoogleFonts.poppins(
+                        color: Colors.grey.shade400,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15),
+                        borderSide: BorderSide.none,
+                      ),
+                      filled: true,
+                      fillColor: Colors.white,
+                      contentPadding: const EdgeInsets.all(15),
+                    ),
+                    style: GoogleFonts.poppins(),
+                    onChanged: (value) => content = value,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: Text(
+                        'Cancel',
+                        style: GoogleFonts.poppins(
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.orange.shade400,
+                            Colors.deepOrange.shade400,
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(15),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.orange.withOpacity(0.3),
+                            spreadRadius: 1,
+                            blurRadius: 8,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          if (title?.isNotEmpty == true &&
+                              content?.isNotEmpty == true) {
+                            if (id == null) {
+                              await notesProvider.addNote(title!, content!);
+                            } else {
+                              await notesProvider.updateNote(
+                                  id, title!, content!);
+                            }
+                            Navigator.pop(context);
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          shadowColor: Colors.transparent,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                        ),
+                        child: Text(
+                          id == null ? 'Add Note' : 'Save Changes',
+                          style: GoogleFonts.poppins(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
-      ),
-    );
-  }
+      );
+    }
 
-  @override
+    @override
   Widget build(BuildContext context) {
     return Consumer<NotesProvider>(
       builder: (context, notesProvider, child) {
@@ -353,7 +353,7 @@ class Home extends StatelessWidget {
                                 Icons.logout_rounded,
                                 color: Colors.deepOrange.shade400,
                               ),
-                              onPressed: () => signOut(context),
+                              onPressed: () => signOut(context), // Define your signOut function
                             ),
                           ],
                         ),
@@ -364,8 +364,8 @@ class Home extends StatelessWidget {
                     child: StreamBuilder<QuerySnapshot>(
                       stream: notesProvider.getNotesStream(),
                       builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
+                        // error showing this line 
+                        if (snapshot.connectionState == ConnectionState.waiting) { 
                           return Center(
                             child: CircularProgressIndicator(
                               valueColor: AlwaysStoppedAnimation<Color>(
@@ -430,13 +430,10 @@ class Home extends StatelessWidget {
                             itemCount: notes.length,
                             itemBuilder: (context, index) {
                               final note = notes[index];
-                              final noteData =
-                                  note.data() as Map<String, dynamic>;
-                              final colorIndex = noteData['colorIndex'] ??
-                                  index % noteColors.length;
+                              final noteData = note.data() as Map<String, dynamic>;
+                              final colorIndex = noteData['colorIndex'] ?? index % noteColors.length;
 
-                              return buildNoteCard(context, note.id, noteData,
-                                  noteColors[colorIndex]);
+                              return buildNoteCard(context, note.id, noteData, noteColors[colorIndex]);
                             },
                           );
                         } else {
@@ -445,15 +442,12 @@ class Home extends StatelessWidget {
                             itemCount: notes.length,
                             itemBuilder: (context, index) {
                               final note = notes[index];
-                              final noteData =
-                                  note.data() as Map<String, dynamic>;
-                              final colorIndex = noteData['colorIndex'] ??
-                                  index % noteColors.length;
+                              final noteData = note.data() as Map<String, dynamic>;
+                              final colorIndex = noteData['colorIndex'] ?? index % noteColors.length;
 
                               return Padding(
                                 padding: const EdgeInsets.only(bottom: 16),
-                                child: buildNoteCard(context, note.id, noteData,
-                                    noteColors[colorIndex]),
+                                child: buildNoteCard(context, note.id, noteData, noteColors[colorIndex]),
                               );
                             },
                           );
@@ -484,7 +478,7 @@ class Home extends StatelessWidget {
               ],
             ),
             child: FloatingActionButton(
-              onPressed: () => addOrUpdateNote(context),
+              onPressed: () => addOrUpdateNote(context), // Define your addOrUpdateNote function
               elevation: 0,
               backgroundColor: Colors.transparent,
               child: const Icon(Icons.add),
@@ -495,122 +489,123 @@ class Home extends StatelessWidget {
     );
   }
 
-  Widget buildNoteCard(BuildContext context, String id,
-      Map<String, dynamic> noteData, Color color) {
-    final timestamp = noteData['timestamp'] as Timestamp?;
-    final formattedTime = timestamp != null
-        ? DateFormat('MMM dd, yyyy').format(timestamp.toDate())
-        : 'Unknown Date';
 
-    return GestureDetector(
-      onTap: () => addOrUpdateNote(
-        context,
-        id: id,
-        currentTitle: noteData['title'] as String?,
-        currentContent: noteData['content'] as String?,
-      ),
-      onLongPress: () => deleteNoteDialog(context, id),
-      child: Container(
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(15),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 10,
-              offset: const Offset(0, 5),
-            ),
-          ],
+    Widget buildNoteCard(BuildContext context, String id,
+        Map<String, dynamic> noteData, Color color) {
+      final timestamp = noteData['timestamp'] as Timestamp?;
+      final formattedTime = timestamp != null
+          ? DateFormat('MMM dd, yyyy').format(timestamp.toDate())
+          : 'Unknown Date';
+
+      return GestureDetector(
+        onTap: () => addOrUpdateNote(
+          context,
+          id: id,
+          currentTitle: noteData['title'] as String?,
+          currentContent: noteData['content'] as String?,
         ),
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Text(
-                    noteData['title'] ?? 'Untitled',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.poppins(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+        onLongPress: () => deleteNoteDialog(context, id),
+        child: Container(
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(15),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 10,
+                offset: const Offset(0, 5),
+              ),
+            ],
+          ),
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      noteData['title'] ?? 'Untitled',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.poppins(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
                     ),
                   ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.delete, color: Colors.redAccent),
-                  onPressed: () => deleteNoteDialog(context, id),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Expanded(
-              child: Text(
-                noteData['content'] ?? '',
-                maxLines: 4,
-                overflow: TextOverflow.ellipsis,
-                style: GoogleFonts.poppins(
-                  fontSize: 14,
-                  color: Colors.black54,
+                  IconButton(
+                    icon: const Icon(Icons.delete, color: Colors.redAccent),
+                    onPressed: () => deleteNoteDialog(context, id),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Expanded(
+                child: Text(
+                  noteData['content'] ?? '',
+                  maxLines: 4,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    color: Colors.black54,
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 8),
-            Align(
-              alignment: Alignment.bottomRight,
-              child: Text(
-                formattedTime,
-                style: GoogleFonts.poppins(
-                  fontSize: 12,
-                  color: Colors.black45,
+              const SizedBox(height: 8),
+              Align(
+                alignment: Alignment.bottomRight,
+                child: Text(
+                  formattedTime,
+                  style: GoogleFonts.poppins(
+                    fontSize: 12,
+                    color: Colors.black45,
+                  ),
                 ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    Future<void> deleteNoteDialog(BuildContext context, String id) async {
+      final notesProvider = Provider.of<NotesProvider>(context, listen: false);
+
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+          title: Text(
+            'Delete Note',
+            style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+          ),
+          content: Text(
+            'Are you sure you want to delete this note?',
+            style: GoogleFonts.poppins(),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                'Cancel',
+                style: GoogleFonts.poppins(color: Colors.grey),
+              ),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.pop(context);
+                await notesProvider.deleteNote(id);
+              },
+              child: Text(
+                'Delete',
+                style: GoogleFonts.poppins(color: Colors.red),
               ),
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Future<void> deleteNoteDialog(BuildContext context, String id) async {
-    final notesProvider = Provider.of<NotesProvider>(context, listen: false);
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        title: Text(
-          'Delete Note',
-          style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
-        ),
-        content: Text(
-          'Are you sure you want to delete this note?',
-          style: GoogleFonts.poppins(),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              'Cancel',
-              style: GoogleFonts.poppins(color: Colors.grey),
-            ),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              await notesProvider.deleteNote(id);
-            },
-            child: Text(
-              'Delete',
-              style: GoogleFonts.poppins(color: Colors.red),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
+      );
+    }
+  } 

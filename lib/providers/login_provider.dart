@@ -1,6 +1,6 @@
 // ignore_for_file: prefer_const_constructors, use_build_context_synchronously
 
-import 'package:authenticationapp/screens/homepage.dart';
+import 'package:authenticationapp/screens/homepage.dart' as authApp;
 
 import 'package:flutter/material.dart';
 
@@ -84,7 +84,7 @@ class LoginState with ChangeNotifier {
         password: password,
       );
       Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (context) => Home()));
+          context, MaterialPageRoute(builder: (context) => authApp.Home()));
     } on FirebaseAuthException catch (e) {
       showErrorSnackBar(context, e.code);
     } finally {
