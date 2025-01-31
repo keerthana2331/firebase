@@ -111,7 +111,7 @@ class LoginState with ChangeNotifier {
 
       await FirebaseAuth.instance.signInWithCredential(credential);
       Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (context) => Home()));
+          context, MaterialPageRoute(builder: (context) => authApp.Home()));
     } catch (e) {
       showErrorSnackBar(context, "google-sign-in-failed");
     } finally {

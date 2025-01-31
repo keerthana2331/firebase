@@ -176,7 +176,7 @@ class SignUpState extends ChangeNotifier {
 
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => Home()),
+          MaterialPageRoute(builder: (context) => auth_home.Home()),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
