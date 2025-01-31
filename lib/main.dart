@@ -3,6 +3,7 @@
 import 'package:authenticationapp/providers/forgetpassword_provider.dart';
 import 'package:authenticationapp/providers/homescreenprovider.dart';
 import 'package:authenticationapp/screens/frontpage.dart';
+import 'package:authenticationapp/screens/imageupload.dart';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';

@@ -1,5 +1,6 @@
 // home.dart
 import 'package:authenticationapp/providers/homescreenprovider.dart';
+import 'package:authenticationapp/screens/imageupload.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -256,11 +257,23 @@ class Home extends StatelessWidget {
 onPressed: () async {
   if (title?.isNotEmpty == true && content?.isNotEmpty == true) {
     if (id == null) {
-      await notesProvider.addNote(title!, content!);
+      // Add the note first
+      String noteId = await notesProvider.addNote(title!, content!);
+      
+      // Navigate to ImageUploadScreen, passing the noteId and current user's email
+      // Navigator.push(
+      //   context,
+      //   MaterialPageRoute(
+      //     builder: (context) => ImageUploadScreen(
+      //       noteId: noteId, 
+      //       userEmail: FirebaseAuth.instance.currentUser?.email ?? ''
+      //     )
+      //   )
+      // );
     } else {
       await notesProvider.updateNote(id, title!, content!);
+      Navigator.pop(context);
     }
-    Navigator.pop(context);
   } else {
     Navigator.pop(context);
     ScaffoldMessenger.of(context).showSnackBar(
@@ -305,10 +318,18 @@ onPressed: () async {
       ),
     );
   }
-
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<NotesProvider>(
+@override
+Widget build(BuildContext context) {
+  return WillPopScope(
+    onWillPop: () async {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => LogIn()), 
+        (route) => false
+      );
+      return false;
+    },
+    child: Consumer<NotesProvider>(
       builder: (context, notesProvider, child) {
         return Scaffold(
           body: Container(
@@ -332,224 +353,228 @@ onPressed: () async {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        ShaderMask(
-                          shaderCallback: (bounds) => LinearGradient(
-                            colors: [
-                              Colors.orange.shade700,
-                              Colors.deepOrange.shade900,
-                            ],
-                          ).createShader(bounds),
-                          child: Text(
-                            "My Notes",
-                            style: GoogleFonts.poppins(
-                              color: Colors.white,
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
                         Row(
                           children: [
                             IconButton(
                               icon: Icon(
-                                notesProvider.isGridView
-                                    ? Icons.view_list
-                                    : Icons.grid_view,
+                                Icons.arrow_back,
                                 color: Colors.deepOrange.shade400,
                               ),
-                              onPressed: () => notesProvider.toggleView(),
+                              onPressed: () {
+                                Navigator.pushAndRemoveUntil(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => LogIn()), 
+                                  (route) => false
+                                );
+                              },
                             ),
-                            IconButton(
-                              icon: Icon(
-                                Icons.logout_rounded,
-                                color: Colors.deepOrange.shade400,
+                            ShaderMask(
+                              shaderCallback: (bounds) => LinearGradient(
+                                colors: [
+                                  Colors.orange.shade700,
+                                  Colors.deepOrange.shade900,
+                                ],
+                              ).createShader(bounds),
+                              child: Text(
+                                "My Notes",
+                                style: GoogleFonts.poppins(
+                                  color: Colors.white,
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                              onPressed: () => signOut(context),
                             ),
                           ],
+                        ),
+                        IconButton(
+                          icon: Icon(
+                            notesProvider.isGridView
+                                ? Icons.view_list
+                                : Icons.grid_view,
+                            color: Colors.deepOrange.shade400,
+                          ),
+                          onPressed: () => notesProvider.toggleView(),
                         ),
                       ],
                     ),
                   ),
-                  Expanded(
-  child: StreamBuilder<QuerySnapshot>(
-    // Modify the stream to filter by user email
-    stream: FirebaseFirestore.instance
-        .collection('notes')
-        .where('userEmail', isEqualTo: FirebaseAuth.instance.currentUser?.email)
-        .snapshots(),
-    builder: (context, snapshot) {
-      if (snapshot.connectionState == ConnectionState.waiting) {
-        return Center(
-          child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(
-              Colors.deepOrange.shade400,
-            ),
-          ),
-        );
-      }
-
-      // Check if there's no user logged in
-      if (FirebaseAuth.instance.currentUser == null) {
-        return TweenAnimationBuilder(
-          tween: Tween<double>(begin: 0, end: 1),
-          duration: const Duration(milliseconds: 1000),
-          builder: (context, double value, child) {
-            return Opacity(
-              opacity: value,
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.login_rounded,
-                      size: 80,
-                      color: Colors.deepOrange.shade200,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Please Login First',
-                      style: GoogleFonts.poppins(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.deepOrange.shade400,
-                      ),
-                    ),
-                    Text(
-                      'Sign in to view and create notes',
-                      style: GoogleFonts.poppins(
-                        color: Colors.grey.shade600,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        );
-      }
-
-      // Check for empty notes for logged in user
-      if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-        return TweenAnimationBuilder(
-          tween: Tween<double>(begin: 0, end: 1),
-          duration: const Duration(milliseconds: 1000),
-          builder: (context, double value, child) {
-            return Opacity(
-              opacity: value,
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.note_add_rounded,
-                      size: 80,
-                      color: Colors.deepOrange.shade200,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'No Notes Yet',
-                      style: GoogleFonts.poppins(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.deepOrange.shade400,
-                      ),
-                    ),
-                    Text(
-                      'Tap + to create your first note',
-                      style: GoogleFonts.poppins(
-                        color: Colors.grey.shade600,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        );
-      }
-
-                        final notes = snapshot.data!.docs;
-
-                        if (notesProvider.isGridView) {
-                          return GridView.builder(
-                            padding: const EdgeInsets.all(16),
-                            gridDelegate:
-                                const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              crossAxisSpacing: 16,
-                              mainAxisSpacing: 16,
-                              childAspectRatio: 0.85,
+                Expanded(
+                  child: StreamBuilder<QuerySnapshot>(
+                    stream: FirebaseFirestore.instance
+                        .collection('notes')
+                        .where('userEmail', isEqualTo: FirebaseAuth.instance.currentUser?.email)
+                        .snapshots(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Center(
+                          child: CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.deepOrange.shade400,
                             ),
-                            itemCount: notes.length,
-                            itemBuilder: (context, index) {
-                              final note = notes[index];
-                              final noteData =
-                                  note.data() as Map<String, dynamic>;
-                              final colorIndex = noteData['colorIndex'] ??
-                                  index % noteColors.length;
+                          ),
+                        );
+                      }
 
-                              return buildNoteCard(context, note.id, noteData,
-                                  noteColors[colorIndex]);
-                            },
-                          );
-                        } else {
-                          return ListView.builder(
-                            padding: const EdgeInsets.all(16),
-                            itemCount: notes.length,
-                            itemBuilder: (context, index) {
-                              final note = notes[index];
-                              final noteData =
-                                  note.data() as Map<String, dynamic>;
-                              final colorIndex = noteData['colorIndex'] ??
-                                  index % noteColors.length;
+                      if (FirebaseAuth.instance.currentUser == null) {
+                        return TweenAnimationBuilder(
+                          tween: Tween<double>(begin: 0, end: 1),
+                          duration: const Duration(milliseconds: 1000),
+                          builder: (context, double value, child) {
+                            return Opacity(
+                              opacity: value,
+                              child: Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.login_rounded,
+                                      size: 80,
+                                      color: Colors.deepOrange.shade200,
+                                    ),
+                                    const SizedBox(height: 16),
+                                    Text(
+                                      'Please Login First',
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.deepOrange.shade400,
+                                      ),
+                                    ),
+                                    Text(
+                                      'Sign in to view and create notes',
+                                      style: GoogleFonts.poppins(
+                                        color: Colors.grey.shade600,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        );
+                      }
 
-                              return Padding(
-                                padding: const EdgeInsets.only(bottom: 16),
-                                child: buildNoteCard(context, note.id, noteData,
-                                    noteColors[colorIndex]),
-                              );
-                            },
-                          );
-                        }
-                      },
-                    ),
+                      if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                        return TweenAnimationBuilder(
+                          tween: Tween<double>(begin: 0, end: 1),
+                          duration: const Duration(milliseconds: 1000),
+                          builder: (context, double value, child) {
+                            return Opacity(
+                              opacity: value,
+                              child: Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.note_add_rounded,
+                                      size: 80,
+                                      color: Colors.deepOrange.shade200,
+                                    ),
+                                    const SizedBox(height: 16),
+                                    Text(
+                                      'No Notes Yet',
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.deepOrange.shade400,
+                                      ),
+                                    ),
+                                    Text(
+                                      'Tap + to create your first note',
+                                      style: GoogleFonts.poppins(
+                                        color: Colors.grey.shade600,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        );
+                      }
+
+                      final notes = snapshot.data!.docs;
+
+                      if (notesProvider.isGridView) {
+                        return GridView.builder(
+                          padding: const EdgeInsets.all(16),
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            crossAxisSpacing: 16,
+                            mainAxisSpacing: 16,
+                            childAspectRatio: 0.85,
+                          ),
+                          itemCount: notes.length,
+                          itemBuilder: (context, index) {
+                            final note = notes[index];
+                            final noteData =
+                                note.data() as Map<String, dynamic>;
+                            final colorIndex = noteData['colorIndex'] ??
+                                index % noteColors.length;
+
+                            return buildNoteCard(context, note.id, noteData,
+                                noteColors[colorIndex]);
+                          },
+                        );
+                      } else {
+                        return ListView.builder(
+                          padding: const EdgeInsets.all(16),
+                          itemCount: notes.length,
+                          itemBuilder: (context, index) {
+                            final note = notes[index];
+                            final noteData =
+                                note.data() as Map<String, dynamic>;
+                            final colorIndex = noteData['colorIndex'] ??
+                                index % noteColors.length;
+
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 16),
+                              child: buildNoteCard(context, note.id, noteData,
+                                  noteColors[colorIndex]),
+                            );
+                          },
+                        );
+                      }
+                    },
                   ),
-                ],
-              ),
-            ),
-          ),
-          floatingActionButton: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Colors.orange.shade400,
-                  Colors.deepOrange.shade400,
-                ],
-              ),
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.orange.withOpacity(0.3),
-                  spreadRadius: 1,
-                  blurRadius: 8,
-                  offset: const Offset(0, 4),
                 ),
               ],
             ),
-            child: FloatingActionButton(
-              onPressed: () => addOrUpdateNote(context),
-              elevation: 0,
-              backgroundColor: Colors.transparent,
-              child: const Icon(Icons.add),
-            ),
           ),
-        );
-      },
-    );
-  }
+        ),
+        floatingActionButton: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Colors.orange.shade400,
+                Colors.deepOrange.shade400,
+              ],
+            ),
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.orange.withOpacity(0.3),
+                spreadRadius: 1,
+                blurRadius: 8,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: FloatingActionButton(
+            onPressed: () => addOrUpdateNote(context),
+            elevation: 0,
+            backgroundColor: Colors.transparent,
+            child: const Icon(Icons.add),
+          ),
+        ),
+      );
+    },
+    )
+  );
+}
 
   Widget buildNoteCard(BuildContext context, String id,
       Map<String, dynamic> noteData, Color color) {

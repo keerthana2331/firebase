@@ -10,6 +10,7 @@ class NotesProvider with ChangeNotifier {
   bool _isGridView = true;
   List<QueryDocumentSnapshot> _notes = [];
   bool _isLoading = false;
+  List<Color> noteColors = [Colors.red, Colors.green, Colors.blue, Colors.yellow, Colors.orange];
 
   bool get isGridView => _isGridView;
   List<QueryDocumentSnapshot> get notes => _notes;
@@ -20,16 +21,25 @@ class NotesProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> addNote(String title, String content) async {
-  final user = FirebaseAuth.instance.currentUser;
-  if (user != null) {
-    await FirebaseFirestore.instance.collection('notes').add({
+ Future<String> addNote(String title, String content) async {
+  try {
+    // Add the color index randomly or sequentially
+    int colorIndex = Random().nextInt(noteColors.length);
+    
+    DocumentReference docRef = await FirebaseFirestore.instance
+        .collection('notes')
+        .add({
       'title': title,
       'content': content,
-      'timestamp': Timestamp.now(),
-      'userEmail': user.email, // Add user email to the note
-      'colorIndex': Random().nextInt(6), // If you're using random colors
+      'userEmail': FirebaseAuth.instance.currentUser?.email,
+      'timestamp': FieldValue.serverTimestamp(),
+      'colorIndex': colorIndex,
     });
+    
+    return docRef.id; // Return the ID of the newly created note
+  } catch (e) {
+    print('Error adding note: $e');
+    rethrow;
   }
 }
 
