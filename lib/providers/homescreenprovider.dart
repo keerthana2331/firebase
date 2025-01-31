@@ -1,5 +1,8 @@
 // ignore_for_file: prefer_final_fields, avoid_print
 
+import 'dart:math';
+
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -18,19 +21,17 @@ class NotesProvider with ChangeNotifier {
   }
 
   Future<void> addNote(String title, String content) async {
-    try {
-      final colorIndex = DateTime.now().microsecond % 6;
-      await FirebaseFirestore.instance.collection('notes').add({
-        'title': title,
-        'content': content,
-        'timestamp': FieldValue.serverTimestamp(),
-        'colorIndex': colorIndex,
-      });
-      notifyListeners();
-    } catch (e) {
-      print('Error adding note: $e');
-    }
+  final user = FirebaseAuth.instance.currentUser;
+  if (user != null) {
+    await FirebaseFirestore.instance.collection('notes').add({
+      'title': title,
+      'content': content,
+      'timestamp': Timestamp.now(),
+      'userEmail': user.email, // Add user email to the note
+      'colorIndex': Random().nextInt(6), // If you're using random colors
+    });
   }
+}
 
   Future<void> updateNote(String id, String title, String content) async {
     try {

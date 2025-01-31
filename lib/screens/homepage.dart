@@ -253,17 +253,32 @@ class Home extends StatelessWidget {
                       ],
                     ),
                     child: ElevatedButton(
-                      onPressed: () async {
-                        if (title?.isNotEmpty == true &&
-                            content?.isNotEmpty == true) {
-                          if (id == null) {
-                            await notesProvider.addNote(title!, content!);
-                          } else {
-                            await notesProvider.updateNote(id, title!, content!);
-                          }
-                          Navigator.pop(context);
-                        }
-                      },
+onPressed: () async {
+  if (title?.isNotEmpty == true && content?.isNotEmpty == true) {
+    if (id == null) {
+      await notesProvider.addNote(title!, content!);
+    } else {
+      await notesProvider.updateNote(id, title!, content!);
+    }
+    Navigator.pop(context);
+  } else {
+    Navigator.pop(context);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Please add both title and description',
+          style: GoogleFonts.poppins(color: Colors.white),
+        ),
+        backgroundColor: Colors.deepOrange.shade400,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15)
+        ),
+        margin: const EdgeInsets.all(10),
+      ),
+    );
+  }
+},
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.transparent,
                         shadowColor: Colors.transparent,
@@ -357,59 +372,104 @@ class Home extends StatelessWidget {
                     ),
                   ),
                   Expanded(
-                    child: StreamBuilder<QuerySnapshot>(
-                      stream: notesProvider.getNotesStream(),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
-                          return Center(
-                            child: CircularProgressIndicator(
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                Colors.deepOrange.shade400,
-                              ),
-                            ),
-                          );
-                        }
+  child: StreamBuilder<QuerySnapshot>(
+    // Modify the stream to filter by user email
+    stream: FirebaseFirestore.instance
+        .collection('notes')
+        .where('userEmail', isEqualTo: FirebaseAuth.instance.currentUser?.email)
+        .snapshots(),
+    builder: (context, snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return Center(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(
+              Colors.deepOrange.shade400,
+            ),
+          ),
+        );
+      }
 
-                        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                          return TweenAnimationBuilder(
-                            tween: Tween<double>(begin: 0, end: 1),
-                            duration: const Duration(milliseconds: 1000),
-                            builder: (context, double value, child) {
-                              return Opacity(
-                                opacity: value,
-                                child: Center(
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(
-                                        Icons.note_add_rounded,
-                                        size: 80,
-                                        color: Colors.deepOrange.shade200,
-                                      ),
-                                      const SizedBox(height: 16),
-                                      Text(
-                                        'No Notes Yet',
-                                        style: GoogleFonts.poppins(
-                                          fontSize: 24,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.deepOrange.shade400,
-                                        ),
-                                        
-                                      ),
-                                      Text(
-                                        'Tap + to create your first note',
-                                        style: GoogleFonts.poppins(
-                                          color: Colors.grey.shade600,
-                                          fontSize: 16,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            },
-                          );
-                        }
+      // Check if there's no user logged in
+      if (FirebaseAuth.instance.currentUser == null) {
+        return TweenAnimationBuilder(
+          tween: Tween<double>(begin: 0, end: 1),
+          duration: const Duration(milliseconds: 1000),
+          builder: (context, double value, child) {
+            return Opacity(
+              opacity: value,
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.login_rounded,
+                      size: 80,
+                      color: Colors.deepOrange.shade200,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Please Login First',
+                      style: GoogleFonts.poppins(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.deepOrange.shade400,
+                      ),
+                    ),
+                    Text(
+                      'Sign in to view and create notes',
+                      style: GoogleFonts.poppins(
+                        color: Colors.grey.shade600,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      }
+
+      // Check for empty notes for logged in user
+      if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+        return TweenAnimationBuilder(
+          tween: Tween<double>(begin: 0, end: 1),
+          duration: const Duration(milliseconds: 1000),
+          builder: (context, double value, child) {
+            return Opacity(
+              opacity: value,
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.note_add_rounded,
+                      size: 80,
+                      color: Colors.deepOrange.shade200,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'No Notes Yet',
+                      style: GoogleFonts.poppins(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.deepOrange.shade400,
+                      ),
+                    ),
+                    Text(
+                      'Tap + to create your first note',
+                      style: GoogleFonts.poppins(
+                        color: Colors.grey.shade600,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      }
 
                         final notes = snapshot.data!.docs;
 
