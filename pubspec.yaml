@@ -32,6 +32,7 @@ dependencies:
   aws_s3_api: ^2.0.0
   permission_handler: ^11.3.1
   connectivity_plus: ^6.1.2
+  flutter_dotenv: ^5.2.1
 
 dev_dependencies:
   flutter_test:
