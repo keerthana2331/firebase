@@ -246,6 +246,10 @@ class Home extends StatelessWidget {
                       borderRadius: BorderRadius.circular(15),
                       boxShadow: [
                         BoxShadow(
+
+
+
+
                           color: Colors.orange.withOpacity(0.3),
                           spreadRadius: 1,
                           blurRadius: 8,
@@ -261,15 +265,15 @@ onPressed: () async {
       String noteId = await notesProvider.addNote(title!, content!);
       
       // Navigate to ImageUploadScreen, passing the noteId and current user's email
-      // Navigator.push(
-      //   context,
-      //   MaterialPageRoute(
-      //     builder: (context) => ImageUploadScreen(
-      //       noteId: noteId, 
-      //       userEmail: FirebaseAuth.instance.currentUser?.email ?? ''
-      //     )
-      //   )
-      // );
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ImageUploadScreen(
+            noteId: noteId, 
+            userEmail: FirebaseAuth.instance.currentUser?.email ?? ''
+          )
+        )
+      );
     } else {
       await notesProvider.updateNote(id, title!, content!);
       Navigator.pop(context);
